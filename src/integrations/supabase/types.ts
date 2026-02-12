@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      sumber_dana: {
+        Row: {
+          created_at: string | null
+          id: string
+          nama_cabang: string
+          nominal: number | null
+          skg: number | null
+          sumber_lain: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nama_cabang: string
+          nominal?: number | null
+          skg?: number | null
+          sumber_lain?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nama_cabang?: string
+          nominal?: number | null
+          skg?: number | null
+          sumber_lain?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      transaksi: {
+        Row: {
+          bukti_keterangan: string | null
+          bukti_tipe: string | null
+          bukti_url: string | null
+          created_at: string | null
+          id: string
+          jenis: string
+          kategori: string | null
+          keterangan: string
+          nominal: number | null
+          tanggal: string
+          updated_at: string | null
+        }
+        Insert: {
+          bukti_keterangan?: string | null
+          bukti_tipe?: string | null
+          bukti_url?: string | null
+          created_at?: string | null
+          id?: string
+          jenis: string
+          kategori?: string | null
+          keterangan: string
+          nominal?: number | null
+          tanggal?: string
+          updated_at?: string | null
+        }
+        Update: {
+          bukti_keterangan?: string | null
+          bukti_tipe?: string | null
+          bukti_url?: string | null
+          created_at?: string | null
+          id?: string
+          jenis?: string
+          kategori?: string | null
+          keterangan?: string
+          nominal?: number | null
+          tanggal?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
