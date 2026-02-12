@@ -38,9 +38,9 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
             <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Dana Keluar</p>
             <p className="text-xs sm:text-sm font-bold text-destructive whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
           </div>
-          <div className="rounded-lg bg-primary/10 p-3 text-center">
-            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Saldo</p>
-            <p className="text-xs sm:text-sm font-bold text-primary whitespace-nowrap">{formatRupiah(totalMasuk - totalKeluar)}</p>
+          <div className={`rounded-lg p-3 text-center ${(totalMasuk - totalKeluar) >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
+            <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${(totalMasuk - totalKeluar) >= 0 ? 'text-success' : 'text-destructive'}`}>{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
           </div>
         </div>
       </div>
