@@ -25,9 +25,10 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const { toast } = useToast();
 
   const filtered = useMemo(() => {
-    let result = data.filter((d) =>
-      d.namaCabang.toLowerCase().includes(search.toLowerCase())
-    );
+    let result = data.filter((d) => {
+      const q = search.toLowerCase();
+      return d.namaCabang.toLowerCase().includes(q) || d.sumberLain.toLowerCase().includes(q);
+    });
     if (sortDir) {
       result = [...result].sort((a, b) =>
         sortDir === "asc" ? a.nominal - b.nominal : b.nominal - a.nominal
