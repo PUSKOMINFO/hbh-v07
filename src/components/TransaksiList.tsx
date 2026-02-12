@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { SumberDana, Transaksi } from "@/lib/data";
-import { ArrowDownLeft, ArrowUpRight, FileText, TrendingDown, TrendingUp as TrendingUpIcon, Wallet } from "lucide-react";
+import { Transaksi } from "@/lib/data";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2 } from "lucide-react";
 import ProofModal from "./ProofModal";
+import TransaksiForm from "./TransaksiForm";
 
 interface TransaksiListProps {
   data: Transaksi[];
@@ -11,113 +16,133 @@ const formatRupiah = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
 const TransaksiList = ({ data }: TransaksiListProps) => {
-  const [selectedProof, setSelectedProof] = useState<{
-    bukti?: any;
-    keterangan: string;
-  } | null>(null);
-  const sorted = [...data].sort(
-    (a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()
-  );
-  const totalMasuk = data
-    .filter((t) => t.jenis === "masuk")
-    .reduce((s, t) => s + t.nominal, 0);
-  const totalKeluar = data
-    .filter((t) => t.jenis === "keluar")
-    .reduce((s, t) => s + t.nominal, 0);
+  const { user } = useAuth();
+  const [selectedProof, setSelectedProof] = useState<{ bukti?: any; keterangan: string } | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const sorted = [...data].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+  const totalMasuk = data.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
+  const totalKeluar = data.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("transaksi").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Berhasil", description: "Transaksi dihapus" });
+      queryClient.invalidateQueries({ queryKey: ["transaksi"] });
+    }
+    setDeleteId(null);
+  };
+
+  const openEdit = (t: Transaksi) => {
+    setEditItem({
+      id: t.id,
+      tanggal: t.tanggal,
+      keterangan: t.keterangan,
+      jenis: t.jenis,
+      nominal: t.nominal,
+      kategori: t.kategori,
+      bukti_url: t.bukti?.url || null,
+      bukti_tipe: t.bukti?.tipe || null,
+      bukti_keterangan: t.bukti?.keterangan || null,
+    });
+    setFormOpen(true);
+  };
 
   return (
-    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "320ms" }}>
-      <div className="p-4 border-b border-border space-y-3">
-        <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-4 shadow-md flex items-center gap-3">
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
-              <ArrowDownLeft className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Masuk</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
-            </div>
+    <>
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "320ms" }}>
+        <div className="p-4 border-b border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
+            {user && (
+              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
+                <Plus className="h-3.5 w-3.5" /> Tambah
+              </button>
+            )}
           </div>
-          <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-4 shadow-md flex items-center gap-3">
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
-              <ArrowUpRight className="h-5 w-5 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-4 shadow-md flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><ArrowDownLeft className="h-5 w-5 text-white" /></div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Masuk</p>
+                <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Keluar</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+            <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-4 shadow-md flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><ArrowUpRight className="h-5 w-5 text-white" /></div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Keluar</p>
+                <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+              </div>
             </div>
-          </div>
-          <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
-              <Wallet className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+            <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
+              <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><Wallet className="h-5 w-5 text-white" /></div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
+                <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="divide-y divide-border">
-        {sorted.map((t) => (
-          <div
-            key={t.id}
-            className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors"
-          >
-            <div
-              className={`rounded-full p-2 shrink-0 ${
-                t.jenis === "masuk" ? "bg-success/10" : "bg-destructive/10"
-              }`}
-            >
-              {t.jenis === "masuk" ? (
-                <ArrowDownLeft className="h-4 w-4 text-success" />
-              ) : (
-                <ArrowUpRight className="h-4 w-4 text-destructive" />
+        <div className="divide-y divide-border">
+          {sorted.map((t) => (
+            <div key={t.id} className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors">
+              <div className={`rounded-full p-2 shrink-0 ${t.jenis === "masuk" ? "bg-success/10" : "bg-destructive/10"}`}>
+                {t.jenis === "masuk" ? <ArrowDownLeft className="h-4 w-4 text-success" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">{t.keterangan}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                  {" · "}{t.kategori}
+                </p>
+              </div>
+              {t.jenis === "keluar" && t.bukti && (
+                <button onClick={() => setSelectedProof({ bukti: t.bukti, keterangan: t.keterangan })} className="shrink-0 p-2 hover:bg-primary/10 rounded-lg transition-colors group" title="Lihat bukti">
+                  <FileText className="h-4 w-4 text-primary group-hover:text-primary/80" />
+                </button>
               )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{t.keterangan}</p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(t.tanggal).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
-                {" · "}
-                {t.kategori}
+              {user && (
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button onClick={() => openEdit(t)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
+                    <Pencil className="h-3.5 w-3.5 text-primary" />
+                  </button>
+                  <button onClick={() => setDeleteId(t.id)} className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </button>
+                </div>
+              )}
+              <p className={`text-sm font-semibold whitespace-nowrap ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
+                {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
               </p>
             </div>
-            {t.jenis === "keluar" && t.bukti && (
-              <button
-                onClick={() =>
-                  setSelectedProof({ bukti: t.bukti, keterangan: t.keterangan })
-                }
-                className="shrink-0 p-2 hover:bg-primary/10 rounded-lg transition-colors group"
-                title="Lihat bukti pengeluaran"
-              >
-                <FileText className="h-4 w-4 text-primary group-hover:text-primary/80" />
-              </button>
-            )}
-            <p
-              className={`text-sm font-semibold whitespace-nowrap ${
-                t.jenis === "masuk" ? "text-success" : "text-destructive"
-              }`}
-            >
-              {t.jenis === "masuk" ? "+" : "-"}
-              {formatRupiah(t.nominal)}
-            </p>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <ProofModal isOpen={!!selectedProof} onClose={() => setSelectedProof(null)} bukti={selectedProof?.bukti} transaksiKeterangan={selectedProof?.keterangan || ""} />
       </div>
 
-      <ProofModal
-        isOpen={!!selectedProof}
-        onClose={() => setSelectedProof(null)}
-        bukti={selectedProof?.bukti}
-        transaksiKeterangan={selectedProof?.keterangan || ""}
-      />
-    </div>
+      <TransaksiForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
+
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in" onClick={() => setDeleteId(null)}>
+          <div className="bg-card rounded-lg border border-border shadow-xl p-6 max-w-sm mx-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-semibold">Hapus Transaksi?</h3>
+            <p className="text-sm text-muted-foreground">Data yang dihapus tidak dapat dikembalikan.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
+              <button onClick={() => handleDelete(deleteId)} className="px-4 py-2 text-sm rounded-lg bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
