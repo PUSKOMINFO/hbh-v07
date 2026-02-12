@@ -27,18 +27,20 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
 
   return (
     <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "320ms" }}>
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border space-y-3">
         <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
-        <div className="flex gap-4 mt-2">
-          <div className="flex items-center gap-1.5 text-xs">
-            <ArrowDownLeft className="h-3.5 w-3.5 text-success" />
-            <span className="text-muted-foreground">Masuk:</span>
-            <span className="font-semibold text-success">{formatRupiah(totalMasuk)}</span>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-lg bg-success/10 p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Dana Masuk</p>
+            <p className="text-xs sm:text-sm font-bold text-success whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
           </div>
-          <div className="flex items-center gap-1.5 text-xs">
-            <ArrowUpRight className="h-3.5 w-3.5 text-destructive" />
-            <span className="text-muted-foreground">Keluar:</span>
-            <span className="font-semibold text-destructive">{formatRupiah(totalKeluar)}</span>
+          <div className="rounded-lg bg-destructive/10 p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Dana Keluar</p>
+            <p className="text-xs sm:text-sm font-bold text-destructive whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+          </div>
+          <div className="rounded-lg bg-primary/10 p-3 text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Saldo</p>
+            <p className="text-xs sm:text-sm font-bold text-primary whitespace-nowrap">{formatRupiah(totalMasuk - totalKeluar)}</p>
           </div>
         </div>
       </div>

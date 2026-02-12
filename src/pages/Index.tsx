@@ -11,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
-        <div className="container max-w-2xl py-5">
+        <div className="container max-w-3xl py-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary-foreground/15 p-2">
               <BookOpen className="h-6 w-6" />
@@ -25,7 +25,7 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="container max-w-2xl py-4 space-y-4 pb-8">
+      <main className="container max-w-3xl py-4 space-y-4 pb-8">
         <SummaryCards targetDonasi={TARGET_DONASI} realisasi={realisasi} />
         <SumberDanaTable data={initialSumberDana} />
         <TransaksiList data={initialTransaksi} />
