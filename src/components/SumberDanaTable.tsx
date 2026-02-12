@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, DatabaseBackup } from "lucide-react";
+import { seedDataSumberDana } from "@/lib/seedSumberDana";
 import SumberDanaForm from "./SumberDanaForm";
 
 interface SumberDanaTableProps {
@@ -21,8 +22,25 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      // Clear existing data then insert seed
+      await supabase.from("sumber_dana").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error } = await supabase.from("sumber_dana").insert(seedDataSumberDana);
+      if (error) throw error;
+      toast({ title: "Berhasil", description: "Data donasi berhasil di-seed" });
+      queryClient.invalidateQueries({ queryKey: ["sumber_dana"] });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = data.filter((d) => {
@@ -66,9 +84,14 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per cabang</p>
             </div>
             {user && (
-              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
-                <Plus className="h-3.5 w-3.5" /> Tambah
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
+                  <DatabaseBackup className="h-3.5 w-3.5" /> {seeding ? "Seeding..." : "Seed Data"}
+                </button>
+                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
+                  <Plus className="h-3.5 w-3.5" /> Tambah
+                </button>
+              </div>
             )}
           </div>
           <div className="relative">
