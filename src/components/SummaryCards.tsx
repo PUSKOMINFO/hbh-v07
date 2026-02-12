@@ -48,7 +48,7 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
             </div>
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">{c.label}</p>
-              <p className="text-lg font-semibold truncate">{c.value}</p>
+              <p className="text-base sm:text-lg font-semibold whitespace-nowrap">{c.value}</p>
               {c.sub && <p className="text-xs text-muted-foreground">{c.sub}</p>}
             </div>
           </div>
