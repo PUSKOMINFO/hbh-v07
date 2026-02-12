@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SumberDana } from "@/lib/data";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import SumberDanaForm from "./SumberDanaForm";
 
 interface SumberDanaTableProps {
@@ -19,11 +19,25 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const totalSKG = data.reduce((s, d) => s + d.skg, 0);
-  const totalNominal = data.reduce((s, d) => s + d.nominal, 0);
+  const filtered = useMemo(() => {
+    let result = data.filter((d) =>
+      d.namaCabang.toLowerCase().includes(search.toLowerCase())
+    );
+    if (sortDir) {
+      result = [...result].sort((a, b) =>
+        sortDir === "asc" ? a.nominal - b.nominal : b.nominal - a.nominal
+      );
+    }
+    return result;
+  }, [data, search, sortDir]);
+
+  const totalSKG = filtered.reduce((s, d) => s + d.skg, 0);
+  const totalNominal = filtered.reduce((s, d) => s + d.nominal, 0);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("sumber_dana").delete().eq("id", id);
@@ -44,16 +58,28 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   return (
     <>
       <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "240ms" }}>
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per cabang</p>
+         <div className="p-4 border-b border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per cabang</p>
+            </div>
+            {user && (
+              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
+                <Plus className="h-3.5 w-3.5" /> Tambah
+              </button>
+            )}
           </div>
-          {user && (
-            <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
-              <Plus className="h-3.5 w-3.5" /> Tambah
-            </button>
-          )}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Cari nama cabang..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -62,12 +88,22 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
                 <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
                 <th className="py-2.5 px-3 text-left font-medium">Nama Cabang</th>
                 <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
-                <th className="py-2.5 px-3 text-right font-medium">Nominal</th>
+                <th className="py-2.5 px-3 text-right font-medium">
+                  <button
+                    onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
+                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+                  >
+                    Nominal
+                    {sortDir === null && <ArrowUpDown className="h-3.5 w-3.5 opacity-60" />}
+                    {sortDir === "asc" && <ArrowUp className="h-3.5 w-3.5" />}
+                    {sortDir === "desc" && <ArrowDown className="h-3.5 w-3.5" />}
+                  </button>
+                </th>
                 {user && <th className="py-2.5 px-3 text-center font-medium w-20">Aksi</th>}
               </tr>
             </thead>
             <tbody>
-              {data.map((d, i) => (
+              {filtered.map((d, i) => (
                 <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                   <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
                   <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
