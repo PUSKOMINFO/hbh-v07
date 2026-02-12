@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SumberDana, Transaksi } from "@/lib/data";
-import { ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileText, TrendingDown, TrendingUp as TrendingUpIcon, Wallet } from "lucide-react";
 import ProofModal from "./ProofModal";
 
 interface TransaksiListProps {
@@ -29,18 +29,33 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
     <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "320ms" }}>
       <div className="p-4 border-b border-border space-y-3">
         <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,40%)] to-[hsl(152,60%,32%)] p-3 text-center shadow-md">
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">Dana Masuk</p>
-            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-4 shadow-md flex items-center gap-3">
+            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
+              <ArrowDownLeft className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Masuk</p>
+              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
+            </div>
           </div>
-          <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-3 text-center shadow-md">
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">Dana Keluar</p>
-            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+          <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-4 shadow-md flex items-center gap-3">
+            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
+              <ArrowUpRight className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Keluar</p>
+              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+            </div>
           </div>
-          <div className={`rounded-xl p-3 text-center shadow-md ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,40%)] to-[hsl(152,60%,32%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
-            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
-            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+          <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
+            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm">
+              <Wallet className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
+              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+            </div>
           </div>
         </div>
       </div>
