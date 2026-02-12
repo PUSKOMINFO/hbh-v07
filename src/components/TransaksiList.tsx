@@ -30,17 +30,17 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
       <div className="p-4 border-b border-border space-y-3">
         <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-lg bg-success/10 p-3 text-center">
-            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Dana Masuk</p>
-            <p className="text-xs sm:text-sm font-bold text-success whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
+          <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,40%)] to-[hsl(152,60%,32%)] p-3 text-center shadow-md">
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">Dana Masuk</p>
+            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
           </div>
-          <div className="rounded-lg bg-destructive/10 p-3 text-center">
-            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Dana Keluar</p>
-            <p className="text-xs sm:text-sm font-bold text-destructive whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
+          <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-3 text-center shadow-md">
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">Dana Keluar</p>
+            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
           </div>
-          <div className={`rounded-lg p-3 text-center ${(totalMasuk - totalKeluar) >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
-            <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${(totalMasuk - totalKeluar) >= 0 ? 'text-success' : 'text-destructive'}`}>{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+          <div className={`rounded-xl p-3 text-center shadow-md ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,40%)] to-[hsl(152,60%,32%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
+            <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide text-white/70 mb-0.5">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
+            <p className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
           </div>
         </div>
       </div>
