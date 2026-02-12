@@ -87,6 +87,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               <tr className="bg-primary text-primary-foreground">
                 <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
                 <th className="py-2.5 px-3 text-left font-medium">Nama Cabang</th>
+                <th className="py-2.5 px-3 text-left font-medium">Sumber Lain</th>
                 <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
                 <th className="py-2.5 px-3 text-right font-medium">
                   <button
@@ -107,6 +108,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
                 <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                   <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
                   <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
+                  <td className="py-2.5 px-3 text-muted-foreground text-xs">{d.sumberLain || '-'}</td>
                   <td className="py-2.5 px-3 text-center">{d.skg || '-'}</td>
                   <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
                   {user && (
@@ -126,7 +128,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             </tbody>
             <tfoot>
               <tr className="bg-primary/5 font-semibold">
-                <td className="py-2.5 px-3" colSpan={2}>Total</td>
+                <td className="py-2.5 px-3" colSpan={3}>Total</td>
                 <td className="py-2.5 px-3 text-center">{totalSKG}</td>
                 <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
                 {user && <td />}
