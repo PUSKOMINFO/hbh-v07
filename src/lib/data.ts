@@ -13,6 +13,11 @@ export interface Transaksi {
   jenis: 'masuk' | 'keluar';
   nominal: number;
   kategori: string;
+  bukti?: {
+    url: string;
+    tipe: string; // 'image' | 'document'
+    keterangan?: string;
+  };
 }
 
 export const initialSumberDana: SumberDana[] = [
@@ -32,11 +37,42 @@ export const initialSumberDana: SumberDana[] = [
 
 export const initialTransaksi: Transaksi[] = [
   { id: '1', tanggal: '2025-03-15', keterangan: 'Donasi Cabang Bandung', jenis: 'masuk', nominal: 1050000, kategori: 'Donasi Cabang' },
-  { id: '2', tanggal: '2025-03-18', keterangan: 'Sewa Venue Halal Bi Halal', jenis: 'keluar', nominal: 5000000, kategori: 'Operasional' },
+  { 
+    id: '2', 
+    tanggal: '2025-03-18', 
+    keterangan: 'Sewa Venue Halal Bi Halal', 
+    jenis: 'keluar', 
+    nominal: 5000000, 
+    kategori: 'Operasional',
+    bukti: {
+      url: 'https://images.unsplash.com/photo-1562183241-bd70286b63d0?w=800',
+      tipe: 'image',
+      keterangan: 'Invoice Sewa Venue'
+    }
+  },
   { id: '3', tanggal: '2025-03-20', keterangan: 'Donasi Cabang Demak 1', jenis: 'masuk', nominal: 2500000, kategori: 'Donasi Cabang' },
-  { id: '4', tanggal: '2025-03-25', keterangan: 'Konsumsi Acara', jenis: 'keluar', nominal: 3000000, kategori: 'Konsumsi' },
+  { 
+    id: '4', 
+    tanggal: '2025-03-25', 
+    keterangan: 'Konsumsi Acara', 
+    jenis: 'keluar', 
+    nominal: 3000000, 
+    kategori: 'Konsumsi',
+    bukti: {
+      url: 'https://images.unsplash.com/photo-1547521868-14fab9fedca2?w=800',
+      tipe: 'image',
+      keterangan: 'Struk Belanja Konsumsi'
+    }
+  },
   { id: '5', tanggal: '2025-04-01', keterangan: 'Donasi Cabang Cirebon', jenis: 'masuk', nominal: 450000, kategori: 'Donasi Cabang' },
-  { id: '6', tanggal: '2025-04-03', keterangan: 'Cetak Undangan', jenis: 'keluar', nominal: 1500000, kategori: 'Perlengkapan' },
+  { 
+    id: '6', 
+    tanggal: '2025-04-03', 
+    keterangan: 'Cetak Undangan', 
+    jenis: 'keluar', 
+    nominal: 1500000, 
+    kategori: 'Perlengkapan' 
+  },
 ];
 
 export const TARGET_DONASI = 50000000;
