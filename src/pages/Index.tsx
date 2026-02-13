@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
-import { TARGET_DONASI } from "@/lib/data";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { BookOpen, LogIn, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,7 +14,11 @@ const Index = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const { data: sumberDana = [], isLoading: sdLoading } = useSumberDana();
   const { data: transaksi = [], isLoading: trLoading } = useTransaksi();
+  const { data: settings, isLoading: settingsLoading } = useAppSettings();
   const navigate = useNavigate();
+
+  const targetDonasi = Number(settings?.target_donasi || 101050000);
+  const tahunHbh = settings?.tahun_hbh || "2026";
 
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
   const [activeSection, setActiveSection] = useState("rekap");
@@ -49,7 +53,7 @@ const Index = () => {
       : undefined,
   }));
 
-  const isLoading = sdLoading || trLoading;
+  const isLoading = sdLoading || trLoading || settingsLoading;
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,7 +65,7 @@ const Index = () => {
               <BookOpen className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold leading-tight">Halal Bi Halal 2025</h1>
+              <h1 className="text-lg font-bold leading-tight">Halal Bi Halal {tahunHbh}</h1>
               <p className="text-xs opacity-80">Majelis Dzikir Tasbih Indonesia</p>
             </div>
             {!authLoading && (
@@ -96,7 +100,7 @@ const Index = () => {
         ) : (
           <>
             <div ref={rekapRef} className="scroll-mt-4">
-              <SummaryCards targetDonasi={TARGET_DONASI} realisasi={realisasi} />
+              <SummaryCards targetDonasi={targetDonasi} realisasi={realisasi} />
             </div>
             <div ref={donasiRef} className="scroll-mt-4">
               <SumberDanaTable data={mappedSumberDana} />
@@ -111,7 +115,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border py-4 hidden sm:block">
         <p className="text-center text-xs text-muted-foreground">
-          © 2025 Panitia Halal Bi Halal — Majelis Dzikir Tasbih Indonesia
+          © {tahunHbh} Panitia Halal Bi Halal — Majelis Dzikir Tasbih Indonesia
         </p>
       </footer>
 
