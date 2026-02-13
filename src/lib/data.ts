@@ -1,7 +1,6 @@
 export interface SumberDana {
   id: string;
   namaCabang: string;
-  sumberLain: string;
   skg: number;
   nominal: number;
 }
@@ -15,24 +14,24 @@ export interface Transaksi {
   kategori: string;
   bukti?: {
     url: string;
-    tipe: string; // 'image' | 'document'
+    tipe: string;
     keterangan?: string;
   };
 }
 
 export const initialSumberDana: SumberDana[] = [
-  { id: '1', namaCabang: 'KANJENG GURU KH IMRONI ABDILLAH', sumberLain: '', skg: 0, nominal: 500000 },
-  { id: '2', namaCabang: 'BANDUNG', sumberLain: '', skg: 17, nominal: 1050000 },
-  { id: '3', namaCabang: 'BATANG', sumberLain: '', skg: 18, nominal: 450000 },
-  { id: '4', namaCabang: 'BOJONEGORO 1 - KAPAS', sumberLain: '', skg: 2, nominal: 200000 },
-  { id: '5', namaCabang: 'BOJONEGORO 2 - SEKAR', sumberLain: '', skg: 24, nominal: 300000 },
-  { id: '6', namaCabang: 'CIREBON', sumberLain: '', skg: 15, nominal: 450000 },
-  { id: '7', namaCabang: 'DEMAK 1 - WONOKETINGAL', sumberLain: '', skg: 40, nominal: 2500000 },
-  { id: '8', namaCabang: 'DEMAK 2 - DEMPET', sumberLain: '', skg: 40, nominal: 1400000 },
-  { id: '9', namaCabang: 'DEMAK 3 (MRANGGEN)', sumberLain: '', skg: 37, nominal: 950000 },
-  { id: '10', namaCabang: 'GARUT', sumberLain: '', skg: 4, nominal: 100000 },
-  { id: '11', namaCabang: 'GROBOGAN 1 - PURWODADI', sumberLain: '', skg: 57, nominal: 1000000 },
-  { id: '12', namaCabang: 'GROBOGAN 2 - GODONG', sumberLain: '', skg: 16, nominal: 1360000 },
+  { id: '1', namaCabang: 'KANJENG GURU KH IMRONI ABDILLAH', skg: 0, nominal: 500000 },
+  { id: '2', namaCabang: 'BANDUNG', skg: 17, nominal: 1050000 },
+  { id: '3', namaCabang: 'BATANG', skg: 18, nominal: 450000 },
+  { id: '4', namaCabang: 'BOJONEGORO 1 - KAPAS', skg: 2, nominal: 200000 },
+  { id: '5', namaCabang: 'BOJONEGORO 2 - SEKAR', skg: 24, nominal: 300000 },
+  { id: '6', namaCabang: 'CIREBON', skg: 15, nominal: 450000 },
+  { id: '7', namaCabang: 'DEMAK 1 - WONOKETINGAL', skg: 40, nominal: 2500000 },
+  { id: '8', namaCabang: 'DEMAK 2 - DEMPET', skg: 40, nominal: 1400000 },
+  { id: '9', namaCabang: 'DEMAK 3 (MRANGGEN)', skg: 37, nominal: 950000 },
+  { id: '10', namaCabang: 'GARUT', skg: 4, nominal: 100000 },
+  { id: '11', namaCabang: 'GROBOGAN 1 - PURWODADI', skg: 57, nominal: 1000000 },
+  { id: '12', namaCabang: 'GROBOGAN 2 - GODONG', skg: 16, nominal: 1360000 },
 ];
 
 export const initialTransaksi: Transaksi[] = [

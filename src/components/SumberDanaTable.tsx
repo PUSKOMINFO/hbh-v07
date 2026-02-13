@@ -29,7 +29,6 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const handleSeed = async () => {
     setSeeding(true);
     try {
-      // Clear existing data then insert seed
       await supabase.from("sumber_dana").delete().neq("id", "00000000-0000-0000-0000-000000000000");
       const { error } = await supabase.from("sumber_dana").insert(seedDataSumberDana);
       if (error) throw error;
@@ -45,7 +44,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const filtered = useMemo(() => {
     let result = data.filter((d) => {
       const q = search.toLowerCase();
-      return d.namaCabang.toLowerCase().includes(q) || d.sumberLain.toLowerCase().includes(q);
+      return d.namaCabang.toLowerCase().includes(q);
     });
     if (sortDir) {
       result = [...result].sort((a, b) =>
@@ -70,7 +69,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   };
 
   const openEdit = (d: SumberDana) => {
-    setEditItem({ id: d.id, nama_cabang: d.namaCabang, sumber_lain: d.sumberLain, skg: d.skg, nominal: d.nominal });
+    setEditItem({ id: d.id, nama_cabang: d.namaCabang, skg: d.skg, nominal: d.nominal });
     setFormOpen(true);
   };
 
@@ -81,7 +80,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per cabang</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
             </div>
             {user && (
               <div className="flex items-center gap-2">
@@ -98,7 +97,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Cari nama cabang..."
+              placeholder="Cari sumber donasi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
@@ -110,8 +109,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             <thead>
               <tr className="bg-primary text-primary-foreground">
                 <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
-                <th className="py-2.5 px-3 text-left font-medium">Nama Cabang</th>
-                <th className="py-2.5 px-3 text-left font-medium">Sumber Lain</th>
+                <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
                 <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
                 <th className="py-2.5 px-3 text-right font-medium">
                   <button
@@ -132,7 +130,6 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
                 <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                   <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
                   <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
-                  <td className="py-2.5 px-3 text-muted-foreground text-xs">{d.sumberLain || '-'}</td>
                   <td className="py-2.5 px-3 text-center">{d.skg || '-'}</td>
                   <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
                   {user && (
@@ -152,7 +149,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             </tbody>
             <tfoot>
               <tr className="bg-primary/5 font-semibold">
-                <td className="py-2.5 px-3" colSpan={3}>Total</td>
+                <td className="py-2.5 px-3" colSpan={2}>Total</td>
                 <td className="py-2.5 px-3 text-center">{totalSKG}</td>
                 <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
                 {user && <td />}

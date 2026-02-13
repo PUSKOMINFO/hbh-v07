@@ -6,8 +6,7 @@ import { X } from "lucide-react";
 import { z } from "zod";
 
 const schema = z.object({
-  nama_cabang: z.string().trim().min(1, "Nama cabang wajib diisi").max(200),
-  sumber_lain: z.string().max(200).optional(),
+  nama_cabang: z.string().trim().min(1, "Sumber donasi wajib diisi").max(200),
   skg: z.number().int().min(0).max(99999),
   nominal: z.number().int().min(0).max(999999999999),
 });
@@ -15,12 +14,11 @@ const schema = z.object({
 interface SumberDanaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  editData?: { id: string; nama_cabang: string; sumber_lain: string; skg: number; nominal: number } | null;
+  editData?: { id: string; nama_cabang: string; skg: number; nominal: number } | null;
 }
 
 const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
   const [namaCabang, setNamaCabang] = useState(editData?.nama_cabang || "");
-  const [sumberLain, setSumberLain] = useState(editData?.sumber_lain || "");
   const [skg, setSkg] = useState(editData?.skg?.toString() || "0");
   const [nominal, setNominal] = useState(editData?.nominal?.toString() || "0");
   const [loading, setLoading] = useState(false);
@@ -36,7 +34,6 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
 
     const parsed = schema.safeParse({
       nama_cabang: namaCabang,
-      sumber_lain: sumberLain,
       skg: parseInt(skg) || 0,
       nominal: parseInt(nominal) || 0,
     });
@@ -53,7 +50,6 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
     setLoading(true);
     const payload = {
       nama_cabang: parsed.data.nama_cabang,
-      sumber_lain: parsed.data.sumber_lain || "",
       skg: parsed.data.skg,
       nominal: parsed.data.nominal,
     };
@@ -77,18 +73,14 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 animate-fade-in" onClick={onClose}>
       <div className="w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-lg border border-border shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="font-semibold">{editData ? "Edit Sumber Dana" : "Tambah Sumber Dana"}</h2>
+          <h2 className="font-semibold">{editData ? "Edit Sumber Donasi" : "Tambah Sumber Donasi"}</h2>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors"><X className="h-5 w-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div className="space-y-1">
-            <label className="text-sm font-medium">Nama Cabang *</label>
+            <label className="text-sm font-medium">Sumber Donasi *</label>
             <input value={namaCabang} onChange={(e) => setNamaCabang(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={200} required />
             {errors.nama_cabang && <p className="text-xs text-destructive">{errors.nama_cabang}</p>}
-          </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Sumber Lain</label>
-            <input value={sumberLain} onChange={(e) => setSumberLain(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={200} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
