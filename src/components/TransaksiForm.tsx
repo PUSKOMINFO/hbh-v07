@@ -248,11 +248,16 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
               </select>
             ) : (
               <select value={selectedSeksi} onChange={(e) => { setSelectedSeksi(e.target.value); setKategori(e.target.value); setKeterangan(""); }} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" required>
-                <option value="">-- Pilih Seksi --</option>
-                {anggaranSeksi.map((s) => (
-                  <option key={s.id} value={s.nama_seksi}>{s.nama_seksi}</option>
-                ))}
-              </select>
+                  <option value="">-- Pilih Seksi --</option>
+                  {anggaranSeksi
+                    .filter((s) => s.nama_seksi !== "Lainnya")
+                    .map((s) => (
+                      <option key={s.id} value={s.nama_seksi}>{s.nama_seksi}</option>
+                    ))}
+                  {anggaranSeksi.some((s) => s.nama_seksi === "Lainnya") && (
+                    <option value="Lainnya">Lainnya</option>
+                  )}
+                </select>
             )}
           </div>
 

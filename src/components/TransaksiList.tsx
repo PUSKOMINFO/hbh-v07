@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Transaksi } from "@/lib/data";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2, X, Image, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2, X, Image, ChevronLeft, ChevronRight, Search, Filter, RotateCcw } from "lucide-react";
 import TransaksiForm from "./TransaksiForm";
 
 interface TransaksiListProps {
@@ -29,7 +29,43 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const sorted = [...data].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+  // Filter & Search state
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [jenisFilter, setJenisFilter] = useState<"semua" | "masuk" | "keluar">("semua");
+  const [kategoriFilter, setKategoriFilter] = useState("semua");
+
+  const kategoriList = useMemo(() => {
+    const cats = new Set(data.map((t) => t.kategori));
+    return Array.from(cats).sort();
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    return data.filter((t) => {
+      if (jenisFilter !== "semua" && t.jenis !== jenisFilter) return false;
+      if (kategoriFilter !== "semua" && t.kategori !== kategoriFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchKeterangan = t.keterangan.toLowerCase().includes(q);
+        const matchNominal = formatRupiah(t.nominal).toLowerCase().includes(q);
+        const matchKategori = t.kategori.toLowerCase().includes(q);
+        const matchTanggal = new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }).toLowerCase().includes(q);
+        if (!matchKeterangan && !matchNominal && !matchKategori && !matchTanggal) return false;
+      }
+      return true;
+    });
+  }, [data, jenisFilter, kategoriFilter, searchQuery]);
+
+  const hasActiveFilters = searchQuery.trim() !== "" || jenisFilter !== "semua" || kategoriFilter !== "semua";
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setJenisFilter("semua");
+    setKategoriFilter("semua");
+    setCurrentPage(1);
+  };
+
+  const sorted = [...filteredData].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
   const totalMasuk = data.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
   const totalKeluar = data.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
 
@@ -97,6 +133,92 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
                 <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalMasuk - totalKeluar)}</p>
               </div>
             </div>
+
+          {/* Filter & Search Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Cari keterangan, nominal, kategori..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 text-[11px] sm:text-xs border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60"
+                />
+                {searchQuery && (
+                  <button onClick={() => { setSearchQuery(""); setCurrentPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-muted rounded-full">
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs rounded-lg border transition-colors shrink-0 ${showFilters ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
+              >
+                <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden sm:inline">Filter</span>
+                {hasActiveFilters && !showFilters && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-pulse" />
+                )}
+              </button>
+            </div>
+
+            {showFilters && (
+              <div className="flex flex-col gap-2 p-2.5 sm:p-3 rounded-lg border border-border bg-muted/30 animate-fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  {/* Jenis Filter */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0 mr-1">Jenis:</span>
+                    {(["semua", "masuk", "keluar"] as const).map((j) => (
+                      <button
+                        key={j}
+                        onClick={() => { setJenisFilter(j); setCurrentPage(1); }}
+                        className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] rounded-md font-medium transition-colors ${
+                          jenisFilter === j
+                            ? j === "masuk" ? "bg-success/15 text-success border border-success/30"
+                            : j === "keluar" ? "bg-destructive/15 text-destructive border border-destructive/30"
+                            : "bg-primary/10 text-primary border border-primary/30"
+                            : "border border-border hover:bg-muted"
+                        }`}
+                      >
+                        {j === "semua" ? "Semua" : j === "masuk" ? "Masuk" : "Keluar"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Kategori Filter */}
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">Kategori:</span>
+                    <select
+                      value={kategoriFilter}
+                      onChange={(e) => { setKategoriFilter(e.target.value); setCurrentPage(1); }}
+                      className="flex-1 min-w-0 text-[10px] sm:text-xs border border-border rounded-md px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-primary truncate"
+                    >
+                      <option value="semua">Semua Kategori</option>
+                      {kategoriList.map((k) => (
+                        <option key={k} value={k}>{k}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {hasActiveFilters && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                      Menampilkan {filteredData.length} dari {data.length} transaksi
+                    </span>
+                    <button
+                      onClick={resetFilters}
+                      className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline"
+                    >
+                      <RotateCcw className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Reset
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
       {/* Inline Form */}
@@ -166,7 +288,19 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
         )}
 
           <div className="divide-y divide-border">
-            {paginatedData.map((t, idx) => {
+            {paginatedData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+                <Search className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground/30 mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Tidak ada transaksi ditemukan</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-0.5">Coba ubah kata kunci atau filter</p>
+                {hasActiveFilters && (
+                  <button onClick={resetFilters} className="mt-2 flex items-center gap-1 text-[11px] sm:text-xs text-primary hover:underline">
+                    <RotateCcw className="h-3 w-3" /> Reset Filter
+                  </button>
+                )}
+              </div>
+            ) : (
+              paginatedData.map((t, idx) => {
               const rowNum = (safeCurrentPage - 1) * pageSize + idx + 1;
               return (
                 <div key={t.id} className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors">
@@ -234,7 +368,8 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
                   </p>
                 </div>
               );
-            })}
+              })
+            )}
           </div>
 
         {/* Pagination Controls */}
