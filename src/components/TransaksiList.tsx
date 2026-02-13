@@ -81,11 +81,11 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
                 <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
               </div>
             </div>
-            <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) >= 0 ? 'bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)]' : 'bg-gradient-to-br from-destructive/90 to-destructive'}`}>
+            <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) > 0 ? 'bg-gradient-to-br from-[hsl(210,75%,55%)] to-[hsl(210,70%,40%)]' : (totalMasuk - totalKeluar) < 0 ? 'bg-gradient-to-br from-[hsl(0,72%,55%)] to-[hsl(0,72%,42%)]' : 'bg-gradient-to-br from-[hsl(220,15%,50%)] to-[hsl(220,15%,38%)]'}`}>
               <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><Wallet className="h-5 w-5 text-white" /></div>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">{(totalMasuk - totalKeluar) >= 0 ? 'Surplus' : 'Defisit'}</p>
-                <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(Math.abs(totalMasuk - totalKeluar))}</p>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Status Saldo</p>
+                <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk - totalKeluar)}</p>
               </div>
             </div>
           </div>
