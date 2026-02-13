@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useSumberDana } from "@/hooks/useSumberDana";
+import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
 import { X } from "lucide-react";
 import { z } from "zod";
 
@@ -56,6 +57,8 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: sumberDana = [] } = useSumberDana();
+  const { data: anggaranSeksi = [] } = useAnggaranSeksi();
+  const [selectedSeksi, setSelectedSeksi] = useState(editData?.kategori || "");
 
   if (!isOpen) return null;
 
@@ -151,7 +154,7 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
 
           {/* Sumber Donasi / Kategori */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">{jenis === "masuk" ? "Sumber Donasi *" : "Kategori"}</label>
+            <label className="text-sm font-medium">{jenis === "masuk" ? "Sumber Donasi *" : "Seksi *"}</label>
             {jenis === "masuk" ? (
               <select
                 value={kategori}
@@ -165,9 +168,40 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
                 ))}
               </select>
             ) : (
-              <input value={kategori} onChange={(e) => setKategori(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={100} placeholder="Operasional" />
+              <select
+                value={selectedSeksi}
+                onChange={(e) => { setSelectedSeksi(e.target.value); setKategori(e.target.value); setKeterangan(""); }}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                required
+              >
+                <option value="">-- Pilih Seksi --</option>
+                {anggaranSeksi.map((s) => (
+                  <option key={s.id} value={s.nama_seksi}>{s.nama_seksi}</option>
+                ))}
+              </select>
             )}
           </div>
+
+          {/* Item Pengeluaran for Dana Keluar */}
+          {jenis === "keluar" && selectedSeksi && (() => {
+            const seksi = anggaranSeksi.find((s) => s.nama_seksi === selectedSeksi);
+            if (!seksi || seksi.items.length === 0) return null;
+            return (
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Item Pengeluaran</label>
+                <select
+                  value={keterangan}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">-- Pilih Item atau tulis manual --</option>
+                  {seksi.items.map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
 
           {/* Nominal */}
           <div className="space-y-1">

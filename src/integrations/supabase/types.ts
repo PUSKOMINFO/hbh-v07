@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      anggaran_seksi: {
+        Row: {
+          anggaran: number
+          created_at: string | null
+          id: string
+          items: string[]
+          nama_seksi: string
+          updated_at: string | null
+        }
+        Insert: {
+          anggaran?: number
+          created_at?: string | null
+          id?: string
+          items?: string[]
+          nama_seksi: string
+          updated_at?: string | null
+        }
+        Update: {
+          anggaran?: number
+          created_at?: string | null
+          id?: string
+          items?: string[]
+          nama_seksi?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sumber_dana: {
         Row: {
           created_at: string | null
