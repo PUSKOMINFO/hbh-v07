@@ -8,10 +8,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart } from "lucide-react";
+import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer } from "lucide-react";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
+import { printAllPdf } from "@/lib/exportUtils";
 
 const Index = () => {
   const { user, signOut, loading: authLoading } = useAuth();
