@@ -1,0 +1,77 @@
+export interface SumberDana {
+  id: string;
+  namaCabang: string;
+  skg: number;
+  nominal: number;
+}
+
+export interface Transaksi {
+  id: string;
+  tanggal: string;
+  keterangan: string;
+  jenis: 'masuk' | 'keluar';
+  nominal: number;
+  kategori: string;
+  bukti?: {
+    url: string;
+    tipe: string;
+    keterangan?: string;
+  };
+}
+
+export const initialSumberDana: SumberDana[] = [
+  { id: '1', namaCabang: 'KANJENG GURU KH IMRONI ABDILLAH', skg: 0, nominal: 500000 },
+  { id: '2', namaCabang: 'BANDUNG', skg: 17, nominal: 1050000 },
+  { id: '3', namaCabang: 'BATANG', skg: 18, nominal: 450000 },
+  { id: '4', namaCabang: 'BOJONEGORO 1 - KAPAS', skg: 2, nominal: 200000 },
+  { id: '5', namaCabang: 'BOJONEGORO 2 - SEKAR', skg: 24, nominal: 300000 },
+  { id: '6', namaCabang: 'CIREBON', skg: 15, nominal: 450000 },
+  { id: '7', namaCabang: 'DEMAK 1 - WONOKETINGAL', skg: 40, nominal: 2500000 },
+  { id: '8', namaCabang: 'DEMAK 2 - DEMPET', skg: 40, nominal: 1400000 },
+  { id: '9', namaCabang: 'DEMAK 3 (MRANGGEN)', skg: 37, nominal: 950000 },
+  { id: '10', namaCabang: 'GARUT', skg: 4, nominal: 100000 },
+  { id: '11', namaCabang: 'GROBOGAN 1 - PURWODADI', skg: 57, nominal: 1000000 },
+  { id: '12', namaCabang: 'GROBOGAN 2 - GODONG', skg: 16, nominal: 1360000 },
+];
+
+export const initialTransaksi: Transaksi[] = [
+  { id: '1', tanggal: '2026-03-15', keterangan: 'Donasi Cabang Bandung', jenis: 'masuk', nominal: 1050000, kategori: 'Donasi Cabang' },
+  { 
+    id: '2', 
+    tanggal: '2026-03-18', 
+    keterangan: 'Sewa Venue Halal Bi Halal', 
+    jenis: 'keluar', 
+    nominal: 5000000, 
+    kategori: 'Operasional',
+    bukti: {
+      url: 'https://images.unsplash.com/photo-1562183241-bd70286b63d0?w=800',
+      tipe: 'image',
+      keterangan: 'Invoice Sewa Venue'
+    }
+  },
+  { id: '3', tanggal: '2026-03-20', keterangan: 'Donasi Cabang Demak 1', jenis: 'masuk', nominal: 2500000, kategori: 'Donasi Cabang' },
+  { 
+    id: '4', 
+    tanggal: '2026-03-25', 
+    keterangan: 'Konsumsi Acara', 
+    jenis: 'keluar', 
+    nominal: 3000000, 
+    kategori: 'Konsumsi',
+    bukti: {
+      url: 'https://images.unsplash.com/photo-1547521868-14fab9fedca2?w=800',
+      tipe: 'image',
+      keterangan: 'Struk Belanja Konsumsi'
+    }
+  },
+  { id: '5', tanggal: '2026-04-01', keterangan: 'Donasi Cabang Cirebon', jenis: 'masuk', nominal: 450000, kategori: 'Donasi Cabang' },
+  { 
+    id: '6', 
+    tanggal: '2026-04-03', 
+    keterangan: 'Cetak Undangan', 
+    jenis: 'keluar', 
+    nominal: 1500000, 
+    kategori: 'Perlengkapan' 
+  },
+];
+
+export const TARGET_DONASI = 50000000;

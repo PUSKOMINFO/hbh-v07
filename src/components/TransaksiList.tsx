@@ -1,0 +1,426 @@
+import { useState, useMemo } from "react";
+import { Transaksi } from "@/lib/data";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2, X, Image, ChevronLeft, ChevronRight, Search, Filter, RotateCcw, Download, Printer } from "lucide-react";
+import { exportTransaksiXlsx, printTransaksiPdf } from "@/lib/exportUtils";
+import TransaksiForm from "./TransaksiForm";
+
+interface TransaksiListProps {
+  data: Transaksi[];
+}
+
+const formatRupiah = (n: number) =>
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+
+const formatNumber = (n: number) =>
+  new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 }).format(n);
+
+const TransaksiList = ({ data }: TransaksiListProps) => {
+  const { user } = useAuth();
+  const [selectedProof, setSelectedProof] = useState<{ bukti?: any; keterangan: string } | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filter & Search state
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [jenisFilter, setJenisFilter] = useState<"semua" | "masuk" | "keluar">("semua");
+  const [kategoriFilter, setKategoriFilter] = useState("semua");
+
+  const kategoriList = useMemo(() => {
+    const cats = new Set(data.map((t) => t.kategori));
+    return Array.from(cats).sort();
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    return data.filter((t) => {
+      if (jenisFilter !== "semua" && t.jenis !== jenisFilter) return false;
+      if (kategoriFilter !== "semua" && t.kategori !== kategoriFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchKeterangan = t.keterangan.toLowerCase().includes(q);
+        const matchNominal = formatRupiah(t.nominal).toLowerCase().includes(q);
+        const matchKategori = t.kategori.toLowerCase().includes(q);
+        const matchTanggal = new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }).toLowerCase().includes(q);
+        if (!matchKeterangan && !matchNominal && !matchKategori && !matchTanggal) return false;
+      }
+      return true;
+    });
+  }, [data, jenisFilter, kategoriFilter, searchQuery]);
+
+  const hasActiveFilters = searchQuery.trim() !== "" || jenisFilter !== "semua" || kategoriFilter !== "semua";
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setJenisFilter("semua");
+    setKategoriFilter("semua");
+    setCurrentPage(1);
+  };
+
+  const sorted = [...filteredData].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+  const totalMasuk = data.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
+  const totalKeluar = data.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedData = sorted.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("transaksi").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Berhasil", description: "Transaksi dihapus" });
+      queryClient.invalidateQueries({ queryKey: ["transaksi"] });
+    }
+    setDeleteId(null);
+  };
+
+  const openEdit = (t: Transaksi) => {
+    setEditItem({
+      id: t.id,
+      tanggal: t.tanggal,
+      keterangan: t.keterangan,
+      jenis: t.jenis,
+      nominal: t.nominal,
+      kategori: t.kategori,
+      bukti_url: t.bukti?.url || null,
+      bukti_tipe: t.bukti?.tipe || null,
+      bukti_keterangan: t.bukti?.keterangan || null,
+    });
+    setFormOpen(true);
+  };
+
+    return (
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {user && (
+                  <>
+                    <button onClick={() => exportTransaksiXlsx(data)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                      <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Excel</span>
+                    </button>
+                    <button onClick={() => printTransaksiPdf(data)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-red-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                      <Printer className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">PDF</span>
+                    </button>
+                  </>
+                )}
+                {user && (
+                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity shrink-0">
+                  <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+                </button>
+              )}
+            </div>
+          </div>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-2 sm:p-4 shadow-md">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><ArrowDownLeft className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Masuk</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalMasuk)}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-2 sm:p-4 shadow-md">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Keluar</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalKeluar)}</p>
+              </div>
+              <div className={`rounded-xl p-2 sm:p-4 shadow-md ${(totalMasuk - totalKeluar) > 0 ? 'bg-gradient-to-br from-[hsl(210,75%,55%)] to-[hsl(210,70%,40%)]' : (totalMasuk - totalKeluar) < 0 ? 'bg-gradient-to-br from-[hsl(0,72%,55%)] to-[hsl(0,72%,42%)]' : 'bg-gradient-to-br from-[hsl(220,15%,50%)] to-[hsl(220,15%,38%)]'}`}>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Saldo</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalMasuk - totalKeluar)}</p>
+              </div>
+            </div>
+
+          {/* Filter & Search Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Cari keterangan, nominal, kategori..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 text-[11px] sm:text-xs border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60"
+                />
+                {searchQuery && (
+                  <button onClick={() => { setSearchQuery(""); setCurrentPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 hover:bg-muted rounded-full">
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs rounded-lg border transition-colors shrink-0 ${showFilters ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
+              >
+                <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden sm:inline">Filter</span>
+                {hasActiveFilters && !showFilters && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-pulse" />
+                )}
+              </button>
+            </div>
+
+            {showFilters && (
+              <div className="flex flex-col gap-2 p-2.5 sm:p-3 rounded-lg border border-border bg-muted/30 animate-fade-in">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  {/* Jenis Filter */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0 mr-1">Jenis:</span>
+                    {(["semua", "masuk", "keluar"] as const).map((j) => (
+                      <button
+                        key={j}
+                        onClick={() => { setJenisFilter(j); setCurrentPage(1); }}
+                        className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] rounded-md font-medium transition-colors ${
+                          jenisFilter === j
+                            ? j === "masuk" ? "bg-success/15 text-success border border-success/30"
+                            : j === "keluar" ? "bg-destructive/15 text-destructive border border-destructive/30"
+                            : "bg-primary/10 text-primary border border-primary/30"
+                            : "border border-border hover:bg-muted"
+                        }`}
+                      >
+                        {j === "semua" ? "Semua" : j === "masuk" ? "Masuk" : "Keluar"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Kategori Filter */}
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">Kategori:</span>
+                    <select
+                      value={kategoriFilter}
+                      onChange={(e) => { setKategoriFilter(e.target.value); setCurrentPage(1); }}
+                      className="flex-1 min-w-0 text-[10px] sm:text-xs border border-border rounded-md px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-primary truncate"
+                    >
+                      <option value="semua">Semua Kategori</option>
+                      {kategoriList.map((k) => (
+                        <option key={k} value={k}>{k}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {hasActiveFilters && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                      Menampilkan {filteredData.length} dari {data.length} transaksi
+                    </span>
+                    <button
+                      onClick={resetFilters}
+                      className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline"
+                    >
+                      <RotateCcw className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Reset
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+      {/* Inline Form */}
+      <TransaksiForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
+
+    {/* Modal Proof Viewer */}
+        {selectedProof && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProof(null)}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
+            <div
+              className="relative z-10 w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-fade-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold">Bukti Transaksi</h3>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{selectedProof.keterangan}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedProof(null)}
+                  className="p-2 hover:bg-muted rounded-xl transition-colors shrink-0 ml-3"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              {/* Content */}
+              <div className="p-4">
+                {selectedProof.bukti ? (
+                  <div className="space-y-3">
+                    {selectedProof.bukti.tipe === "image" ? (
+                      <img
+                        src={selectedProof.bukti.url}
+                        alt="Bukti transaksi"
+                        className="w-full max-h-[60vh] object-contain rounded-xl border border-border bg-muted/30"
+                      />
+                    ) : (
+                      <a
+                        href={selectedProof.bukti.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center bg-muted rounded-xl p-8 border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="text-center">
+                          <FileText className="h-12 w-12 text-primary mx-auto mb-2" />
+                          <p className="text-sm font-medium">Buka Dokumen</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{selectedProof.bukti.url.split("/").pop()}</p>
+                        </div>
+                      </a>
+                    )}
+                    {selectedProof.bukti.keterangan && (
+                      <div className="bg-muted rounded-xl p-3">
+                        <p className="text-[11px] font-medium text-muted-foreground mb-0.5">Keterangan</p>
+                        <p className="text-sm">{selectedProof.bukti.keterangan}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Image className="h-10 w-10 text-muted-foreground mx-auto mb-2 opacity-50" />
+                    <p className="text-sm text-muted-foreground">Tidak ada bukti transaksi</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+          <div className="divide-y divide-border">
+            {paginatedData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+                <Search className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground/30 mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Tidak ada transaksi ditemukan</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground/70 mt-0.5">Coba ubah kata kunci atau filter</p>
+                {hasActiveFilters && (
+                  <button onClick={resetFilters} className="mt-2 flex items-center gap-1 text-[11px] sm:text-xs text-primary hover:underline">
+                    <RotateCcw className="h-3 w-3" /> Reset Filter
+                  </button>
+                )}
+              </div>
+            ) : (
+              paginatedData.map((t, idx) => {
+              const rowNum = (safeCurrentPage - 1) * pageSize + idx + 1;
+              return (
+                <div key={t.id} className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors">
+                  <div className={`rounded-full h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${t.jenis === "masuk" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                    {rowNum}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium line-clamp-2 sm:truncate">{t.keterangan}</p>
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{t.kategori}</p>
+                    </div>
+                    <p className={`text-xs sm:text-sm font-semibold mt-1 sm:hidden ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
+                      {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
+                    </p>
+                  </div>
+                  {/* Bukti Thumbnail */}
+                  <div className="shrink-0">
+                    {t.bukti ? (
+                      <button
+                        onClick={() => setSelectedProof({ bukti: t.bukti, keterangan: t.keterangan })}
+                        className="block rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:shadow-md transition-all"
+                        title="Lihat bukti"
+                      >
+                        {t.bukti.tipe === "image" ? (
+                          <img
+                            src={t.bukti.url}
+                            alt="Bukti"
+                            className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-muted">
+                            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          </div>
+                        )}
+                      </button>
+                    ) : (
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg border border-dashed border-border flex items-center justify-center">
+                        <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </div>
+                  {user && (
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button onClick={() => openEdit(t)} className="p-1 sm:p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
+                        <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
+                      </button>
+                      {deleteId === t.id ? (
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleDelete(t.id)} className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+                          <button onClick={() => setDeleteId(null)} className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setDeleteId(t.id)} className="p-1 sm:p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
+                          <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-destructive" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <p className={`text-sm font-semibold whitespace-nowrap hidden sm:block ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
+                    {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
+                  </p>
+                </div>
+              );
+              })
+            )}
+          </div>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between gap-2 p-3 sm:p-4 border-t border-border bg-muted/30">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Rows:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+              className="text-[10px] sm:text-xs border border-border rounded-md px-1.5 sm:px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {(safeCurrentPage - 1) * pageSize + 1}-{Math.min(safeCurrentPage * pageSize, sorted.length)} / {sorted.length}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safeCurrentPage <= 1}
+              className="p-1.5 rounded-md hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safeCurrentPage >= totalPages}
+              className="p-1.5 rounded-md hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+    </div>
+  );
+};
+
+export default TransaksiList;
