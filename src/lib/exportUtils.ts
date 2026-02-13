@@ -75,144 +75,251 @@ export function exportTransaksiXlsx(data: Transaksi[]) {
 
 export async function printTransaksiPdf(data: Transaksi[]) {
   const sorted = [...data].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  const totalMasuk = data.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
-  const totalKeluar = data.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
+  const dataMasuk = sorted.filter((t) => t.jenis === "masuk");
+  const dataKeluar = sorted.filter((t) => t.jenis === "keluar");
+  const totalMasuk = dataMasuk.reduce((s, t) => s + t.nominal, 0);
+  const totalKeluar = dataKeluar.reduce((s, t) => s + t.nominal, 0);
   const saldo = totalMasuk - totalKeluar;
 
   const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const printDate = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 
-  // Title
+  // ─── PAGE 1: DANA MASUK ───
   doc.setFontSize(14);
-  doc.text("Laporan Dana Masuk & Keluar", 14, 18);
+  doc.text("Laporan Dana Masuk", margin, 18);
   doc.setFontSize(9);
-  doc.text(`Dicetak: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`, 14, 25);
+  doc.text(`Dicetak: ${printDate}`, margin, 25);
 
-  // Summary boxes
+  // Summary box
   doc.setFillColor(37, 160, 100);
-  doc.roundedRect(14, 30, 55, 14, 2, 2, "F");
+  doc.roundedRect(margin, 30, 85, 14, 2, 2, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
-  doc.text("Total Masuk", 17, 36);
-  doc.setFontSize(10);
-  doc.text(formatRupiah(totalMasuk), 17, 42);
-
-  doc.setFillColor(220, 53, 69);
-  doc.roundedRect(75, 30, 55, 14, 2, 2, "F");
-  doc.setFontSize(8);
-  doc.text("Total Keluar", 78, 36);
-  doc.setFontSize(10);
-  doc.text(formatRupiah(totalKeluar), 78, 42);
+  doc.text("Total Dana Masuk", margin + 3, 36);
+  doc.setFontSize(11);
+  doc.text(formatRupiah(totalMasuk), margin + 3, 42);
 
   doc.setFillColor(37, 99, 235);
-  doc.roundedRect(136, 30, 55, 14, 2, 2, "F");
+  doc.roundedRect(margin + 90, 30, 85, 14, 2, 2, "F");
   doc.setFontSize(8);
-  doc.text("Saldo", 139, 36);
-  doc.setFontSize(10);
-  doc.text(formatRupiah(saldo), 139, 42);
+  doc.text("Saldo Akhir", margin + 93, 36);
+  doc.setFontSize(11);
+  doc.text(formatRupiah(saldo), margin + 93, 42);
 
   doc.setTextColor(0, 0, 0);
 
-  // Transaction table
   autoTable(doc, {
     startY: 50,
-    head: [["No", "Tanggal", "Keterangan", "Jenis", "Kategori", "Nominal", "Bukti"]],
-    body: sorted.map((t, i) => [
+    head: [["No", "Tanggal", "Keterangan", "Sumber Dana", "Nominal", "Bukti"]],
+    body: dataMasuk.map((t, i) => [
       i + 1,
       new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
       t.keterangan,
-      t.jenis === "masuk" ? "Masuk" : "Keluar",
       t.kategori,
       formatRupiah(t.nominal),
       t.bukti ? "Ada" : "-",
     ]),
+    foot: [["", "", "", "TOTAL", formatRupiah(totalMasuk), ""]],
     styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235] },
+    headStyles: { fillColor: [37, 160, 100] },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
     columnStyles: {
       0: { cellWidth: 10 },
       1: { cellWidth: 25 },
-      3: { cellWidth: 16 },
-      5: { halign: "right", cellWidth: 30 },
-      6: { cellWidth: 14, halign: "center" },
-    },
-    didParseCell: (data) => {
-      if (data.section === "body" && data.column.index === 3) {
-        const val = data.cell.raw as string;
-        if (val === "Masuk") data.cell.styles.textColor = [37, 160, 100];
-        else if (val === "Keluar") data.cell.styles.textColor = [220, 53, 69];
-      }
+      4: { halign: "right", cellWidth: 32 },
+      5: { cellWidth: 14, halign: "center" },
     },
   });
 
-  // Now add bukti images on separate pages
-  const itemsWithBukti = sorted.filter((t) => t.bukti);
-  if (itemsWithBukti.length > 0) {
+  // ─── PAGE 2: DANA KELUAR ───
+  doc.addPage();
+  doc.setFontSize(14);
+  doc.text("Laporan Dana Keluar", margin, 18);
+  doc.setFontSize(9);
+  doc.text(`Dicetak: ${printDate}`, margin, 25);
+
+  doc.setFillColor(220, 53, 69);
+  doc.roundedRect(margin, 30, 85, 14, 2, 2, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.text("Total Dana Keluar", margin + 3, 36);
+  doc.setFontSize(11);
+  doc.text(formatRupiah(totalKeluar), margin + 3, 42);
+
+  doc.setFillColor(37, 99, 235);
+  doc.roundedRect(margin + 90, 30, 85, 14, 2, 2, "F");
+  doc.setFontSize(8);
+  doc.text("Saldo Akhir", margin + 93, 36);
+  doc.setFontSize(11);
+  doc.text(formatRupiah(saldo), margin + 93, 42);
+
+  doc.setTextColor(0, 0, 0);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [["No", "Tanggal", "Keterangan", "Seksi", "Nominal", "Bukti"]],
+    body: dataKeluar.map((t, i) => [
+      i + 1,
+      new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+      t.keterangan,
+      t.kategori,
+      formatRupiah(t.nominal),
+      t.bukti ? "Ada" : "-",
+    ]),
+    foot: [["", "", "", "TOTAL", formatRupiah(totalKeluar), ""]],
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [220, 53, 69] },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 25 },
+      4: { halign: "right", cellWidth: 32 },
+      5: { cellWidth: 14, halign: "center" },
+    },
+  });
+
+  // ─── BUKTI DANA MASUK (2x2 grid, 4 per page) ───
+  const masukWithBukti = dataMasuk.filter((t) => t.bukti);
+  if (masukWithBukti.length > 0) {
+    await renderBuktiPages(doc, masukWithBukti, "Lampiran Bukti Pembayaran — Dana Masuk", [37, 160, 100], margin, pageW, pageH, printDate);
+  }
+
+  // ─── BUKTI DANA KELUAR (2x2 grid, 4 per page) ───
+  const keluarWithBukti = dataKeluar.filter((t) => t.bukti);
+  if (keluarWithBukti.length > 0) {
+    await renderBuktiPages(doc, keluarWithBukti, "Lampiran Bukti Pembayaran — Dana Keluar", [220, 53, 69], margin, pageW, pageH, printDate);
+  }
+
+  doc.autoPrint();
+  window.open(doc.output("bloburl"), "_blank");
+}
+
+async function renderBuktiPages(
+  doc: jsPDF,
+  items: Transaksi[],
+  title: string,
+  color: [number, number, number],
+  margin: number,
+  pageW: number,
+  pageH: number,
+  printDate: string,
+) {
+  const cols = 2;
+  const rows = 2;
+  const perPage = cols * rows;
+  const gap = 6;
+  const cellW = (pageW - margin * 2 - gap) / cols;
+  const headerH = 32; // space for title + date
+  const cellH = (pageH - margin - headerH - margin - gap) / rows;
+  const imgPad = 4;
+  const labelH = 22; // space for text labels below/above image
+
+  const pages = Math.ceil(items.length / perPage);
+
+  for (let page = 0; page < pages; page++) {
     doc.addPage();
-    doc.setFontSize(13);
-    doc.text("Lampiran Bukti Transaksi", 14, 18);
-    let yPos = 28;
 
-    for (const t of itemsWithBukti) {
-      if (yPos > 240) {
-        doc.addPage();
-        yPos = 18;
-      }
+    // Page header
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(margin, margin, pageW - margin * 2, 18, 2, 2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.text(title, margin + 5, margin + 7);
+    doc.setFontSize(8);
+    doc.text(`Dicetak: ${printDate}  —  Halaman ${page + 1} dari ${pages}`, margin + 5, margin + 13);
+    doc.setTextColor(0, 0, 0);
 
-      doc.setFontSize(9);
+    const startY = margin + headerH;
+
+    const pageItems = items.slice(page * perPage, (page + 1) * perPage);
+
+    for (let idx = 0; idx < pageItems.length; idx++) {
+      const t = pageItems[idx];
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = margin + col * (cellW + gap);
+      const y = startY + row * (cellH + gap);
+
+      // Cell border
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(x, y, cellW, cellH, 2, 2, "S");
+
+      // Label area at top
+      doc.setFillColor(color[0], color[1], color[2]);
+      doc.roundedRect(x, y, cellW, 5, 2, 0, "F");
+      // Fix bottom corners with small rect
+      doc.rect(x, y + 3, cellW, 2, "F");
+
+      const labelType = color[0] === 37 ? "Dana Masuk" : "Dana Keluar";
+      const labelCategory = color[0] === 37 ? t.kategori : t.kategori;
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(6.5);
+      doc.text(`Bukti Pembayaran (${labelType} — ${labelCategory})`, x + 3, y + 4);
+      doc.setTextColor(0, 0, 0);
+
+      // Transaction info
+      const infoY = y + 10;
+      doc.setFontSize(7.5);
       doc.setFont(undefined!, "bold");
-      doc.text(t.keterangan, 14, yPos);
+      const keteranganLines = doc.splitTextToSize(t.keterangan, cellW - imgPad * 2);
+      doc.text(keteranganLines.slice(0, 2), x + imgPad, infoY);
       doc.setFont(undefined!, "normal");
-      doc.setFontSize(8);
-      doc.text(
-        `${new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} — ${formatRupiah(t.nominal)} (${t.jenis === "masuk" ? "Masuk" : "Keluar"})`,
-        14,
-        yPos + 5
-      );
+      doc.setFontSize(6.5);
+      const dateStr = new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      doc.text(`${dateStr}  •  ${formatRupiah(t.nominal)}`, x + imgPad, infoY + (keteranganLines.length > 1 ? 7 : 4));
+
+      // Image area
+      const imgY = infoY + labelH - 6;
+      const imgMaxW = cellW - imgPad * 2;
+      const imgMaxH = cellH - (imgY - y) - imgPad;
 
       if (t.bukti?.tipe === "image") {
         try {
           const imgData = await loadImageAsBase64(t.bukti.url);
           if (imgData) {
             const imgProps = doc.getImageProperties(imgData);
-            const maxW = 80;
             const ratio = imgProps.width / imgProps.height;
-            const w = Math.min(maxW, imgProps.width * 0.26);
-            const h = w / ratio;
-            doc.addImage(imgData, "JPEG", 14, yPos + 8, w, h);
-            yPos += h + 16;
+            let w = imgMaxW;
+            let h = w / ratio;
+            if (h > imgMaxH) {
+              h = imgMaxH;
+              w = h * ratio;
+            }
+            const imgX = x + imgPad + (imgMaxW - w) / 2;
+            doc.addImage(imgData, "JPEG", imgX, imgY, w, h);
           } else {
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(`[Gambar: ${t.bukti.url}]`, 14, yPos + 10);
-            doc.setTextColor(0, 0, 0);
-            yPos += 18;
+            drawPlaceholder(doc, x + imgPad, imgY, imgMaxW, imgMaxH, "[Gambar tidak tersedia]");
           }
         } catch {
-          doc.setFontSize(8);
-          doc.setTextColor(150, 150, 150);
-          doc.text(`[Gambar tidak dapat dimuat]`, 14, yPos + 10);
-          doc.setTextColor(0, 0, 0);
-          yPos += 18;
+          drawPlaceholder(doc, x + imgPad, imgY, imgMaxW, imgMaxH, "[Gambar gagal dimuat]");
         }
       } else if (t.bukti) {
-        doc.setFontSize(8);
-        doc.setTextColor(37, 99, 235);
-        doc.textWithLink(`Dokumen: ${t.bukti.url.split("/").pop() || "file"}`, 14, yPos + 10, { url: t.bukti.url });
-        doc.setTextColor(0, 0, 0);
-        yPos += 18;
+        drawPlaceholder(doc, x + imgPad, imgY, imgMaxW, imgMaxH, `Dokumen: ${t.bukti.url.split("/").pop() || "file"}`);
       }
 
+      // Bukti keterangan at bottom
       if (t.bukti?.keterangan) {
-        doc.setFontSize(8);
+        doc.setFontSize(6);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Ket: ${t.bukti.keterangan}`, 14, yPos);
+        const ketY = y + cellH - 3;
+        doc.text(`Ket: ${t.bukti.keterangan}`, x + imgPad, ketY, { maxWidth: cellW - imgPad * 2 });
         doc.setTextColor(0, 0, 0);
-        yPos += 8;
       }
     }
   }
+}
 
-  doc.autoPrint();
-  window.open(doc.output("bloburl"), "_blank");
+function drawPlaceholder(doc: jsPDF, x: number, y: number, w: number, h: number, text: string) {
+  doc.setFillColor(245, 245, 245);
+  doc.roundedRect(x, y, w, h, 2, 2, "F");
+  doc.setFontSize(7);
+  doc.setTextColor(150, 150, 150);
+  doc.text(text, x + w / 2, y + h / 2, { align: "center", maxWidth: w - 4 });
+  doc.setTextColor(0, 0, 0);
 }
 
 // ─── ANGGARAN SEKSI ───
