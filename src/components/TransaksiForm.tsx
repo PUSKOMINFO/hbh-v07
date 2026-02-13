@@ -33,11 +33,20 @@ interface TransaksiFormProps {
   } | null;
 }
 
+const formatRibuan = (value: string) => {
+  const num = value.replace(/\D/g, "");
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+const parseRibuan = (value: string) => {
+  return value.replace(/\./g, "");
+};
+
 const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
   const [tanggal, setTanggal] = useState(editData?.tanggal || new Date().toISOString().split("T")[0]);
   const [keterangan, setKeterangan] = useState(editData?.keterangan || "");
   const [jenis, setJenis] = useState<"masuk" | "keluar">((editData?.jenis as "masuk" | "keluar") || "masuk");
-  const [nominal, setNominal] = useState(editData?.nominal?.toString() || "0");
+  const [nominalDisplay, setNominalDisplay] = useState(editData?.nominal ? formatRibuan(editData.nominal.toString()) : "");
   const [kategori, setKategori] = useState(editData?.kategori || "");
   const [buktiUrl, setBuktiUrl] = useState(editData?.bukti_url || "");
   const [buktiTipe, setBuktiTipe] = useState(editData?.bukti_tipe || "image");
@@ -50,21 +59,29 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
 
   if (!isOpen) return null;
 
-  // Build kategori options from sumber_dana for "masuk"
   const sumberDonasiOptions = sumberDana
     .map((s) => s.nama_cabang)
     .filter((name) => name.trim() !== "")
     .sort();
 
+  const handleNominalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = parseRibuan(e.target.value);
+    if (/^\d*$/.test(raw)) {
+      setNominalDisplay(raw ? formatRibuan(raw) : "");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    const nominalValue = parseInt(parseRibuan(nominalDisplay)) || 0;
 
     const parsed = schema.safeParse({
       tanggal,
       keterangan,
       jenis,
-      nominal: parseInt(nominal) || 0,
+      nominal: nominalValue,
       kategori: kategori || undefined,
       bukti_url: buktiUrl || undefined,
       bukti_tipe: buktiUrl ? buktiTipe : undefined,
@@ -103,6 +120,7 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
     } else {
       toast({ title: "Berhasil", description: editData ? "Transaksi diperbarui" : "Transaksi ditambahkan" });
       queryClient.invalidateQueries({ queryKey: ["transaksi"] });
+      queryClient.invalidateQueries({ queryKey: ["sumber_dana"] });
       onClose();
     }
   };
@@ -115,75 +133,88 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors"><X className="h-5 w-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Tanggal *</label>
-              <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" required />
-              {errors.tanggal && <p className="text-xs text-destructive">{errors.tanggal}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Jenis *</label>
-              <select value={jenis} onChange={(e) => setJenis(e.target.value as "masuk" | "keluar")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <option value="masuk">Dana Masuk</option>
-                <option value="keluar">Dana Keluar</option>
-              </select>
-            </div>
+          {/* Tanggal */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Tanggal *</label>
+            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" required />
+            {errors.tanggal && <p className="text-xs text-destructive">{errors.tanggal}</p>}
           </div>
+
+          {/* Jenis */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Jenis *</label>
+            <select value={jenis} onChange={(e) => setJenis(e.target.value as "masuk" | "keluar")} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <option value="masuk">Dana Masuk</option>
+              <option value="keluar">Dana Keluar</option>
+            </select>
+          </div>
+
+          {/* Sumber Donasi / Kategori */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium">{jenis === "masuk" ? "Sumber Donasi *" : "Kategori"}</label>
+            {jenis === "masuk" ? (
+              <select
+                value={kategori}
+                onChange={(e) => setKategori(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                required
+              >
+                <option value="">-- Pilih Sumber Donasi --</option>
+                {sumberDonasiOptions.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            ) : (
+              <input value={kategori} onChange={(e) => setKategori(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={100} placeholder="Operasional" />
+            )}
+          </div>
+
+          {/* Nominal */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Nominal (Rp) *</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={nominalDisplay}
+              onChange={handleNominalChange}
+              placeholder="0"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              required
+            />
+            {errors.nominal && <p className="text-xs text-destructive">{errors.nominal}</p>}
+          </div>
+
+          {/* Keterangan */}
           <div className="space-y-1">
             <label className="text-sm font-medium">Keterangan *</label>
             <input value={keterangan} onChange={(e) => setKeterangan(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={300} required />
             {errors.keterangan && <p className="text-xs text-destructive">{errors.keterangan}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Nominal (Rp) *</label>
-              <input type="number" value={nominal} onChange={(e) => setNominal(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={1} required />
-              {errors.nominal && <p className="text-xs text-destructive">{errors.nominal}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">{jenis === "masuk" ? "Sumber Donasi" : "Kategori"}</label>
-              {jenis === "masuk" ? (
-                <select
-                  value={kategori}
-                  onChange={(e) => setKategori(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="">-- Pilih Sumber --</option>
-                  {sumberDonasiOptions.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
-              ) : (
-                <input value={kategori} onChange={(e) => setKategori(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={100} placeholder="Operasional" />
-              )}
-            </div>
-          </div>
 
-          {jenis === "keluar" && (
-            <div className="space-y-3 border-t border-border pt-3">
-              <p className="text-sm font-medium text-muted-foreground">Bukti Pengeluaran (opsional)</p>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">URL Bukti</label>
-                <input value={buktiUrl} onChange={(e) => setBuktiUrl(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} placeholder="https://..." />
-                {errors.bukti_url && <p className="text-xs text-destructive">{errors.bukti_url}</p>}
-              </div>
-              {buktiUrl && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium">Tipe</label>
-                    <select value={buktiTipe} onChange={(e) => setBuktiTipe(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                      <option value="image">Gambar</option>
-                      <option value="document">Dokumen</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium">Keterangan</label>
-                    <input value={buktiKeterangan} onChange={(e) => setBuktiKeterangan(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={300} />
-                  </div>
-                </div>
-              )}
+          {/* Bukti Transfer (optional) */}
+          <div className="space-y-3 border-t border-border pt-3">
+            <p className="text-sm font-medium text-muted-foreground">Upload Bukti Transfer (opsional)</p>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">URL Bukti</label>
+              <input value={buktiUrl} onChange={(e) => setBuktiUrl(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} placeholder="https://..." />
+              {errors.bukti_url && <p className="text-xs text-destructive">{errors.bukti_url}</p>}
             </div>
-          )}
+            {buktiUrl && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Tipe</label>
+                  <select value={buktiTipe} onChange={(e) => setBuktiTipe(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <option value="image">Gambar</option>
+                    <option value="document">Dokumen</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Keterangan</label>
+                  <input value={buktiKeterangan} onChange={(e) => setBuktiKeterangan(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={300} />
+                </div>
+              </div>
+            )}
+          </div>
 
           <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground rounded-lg py-2.5 font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
             {loading ? "Menyimpan..." : editData ? "Simpan Perubahan" : "Tambah"}
