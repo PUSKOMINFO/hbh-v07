@@ -74,66 +74,75 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   };
 
   return (
-    <>
-      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "240ms" }}>
-         <div className="p-4 border-b border-border space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
+    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "240ms" }}>
+      <div className="p-4 border-b border-border space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
+          </div>
+          {user && (
+            <div className="flex items-center gap-2">
+              <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
+                <DatabaseBackup className="h-3.5 w-3.5" /> {seeding ? "Seeding..." : "Seed Data"}
+              </button>
+              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
+                <Plus className="h-3.5 w-3.5" /> Tambah
+              </button>
             </div>
-            {user && (
-              <div className="flex items-center gap-2">
-                <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                  <DatabaseBackup className="h-3.5 w-3.5" /> {seeding ? "Seeding..." : "Seed Data"}
-                </button>
-                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
-                  <Plus className="h-3.5 w-3.5" /> Tambah
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Cari sumber donasi..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
-          </div>
+          )}
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-primary text-primary-foreground">
-                <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
-                <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
-                <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
-                <th className="py-2.5 px-3 text-right font-medium">
-                  <button
-                    onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
-                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
-                  >
-                    Nominal
-                    {sortDir === null && <ArrowUpDown className="h-3.5 w-3.5 opacity-60" />}
-                    {sortDir === "asc" && <ArrowUp className="h-3.5 w-3.5" />}
-                    {sortDir === "desc" && <ArrowDown className="h-3.5 w-3.5" />}
-                  </button>
-                </th>
-                {user && <th className="py-2.5 px-3 text-center font-medium w-20">Aksi</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d, i) => (
-                <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-                  <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
-                  <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
-                  <td className="py-2.5 px-3 text-center">{d.skg || '-'}</td>
-                  <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
-                  {user && (
-                    <td className="py-2.5 px-3 text-center">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Cari sumber donasi..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Inline Form */}
+      <SumberDanaForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-primary text-primary-foreground">
+              <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
+              <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
+              <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
+              <th className="py-2.5 px-3 text-right font-medium">
+                <button
+                  onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
+                  className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+                >
+                  Nominal
+                  {sortDir === null && <ArrowUpDown className="h-3.5 w-3.5 opacity-60" />}
+                  {sortDir === "asc" && <ArrowUp className="h-3.5 w-3.5" />}
+                  {sortDir === "desc" && <ArrowDown className="h-3.5 w-3.5" />}
+                </button>
+              </th>
+              {user && <th className="py-2.5 px-3 text-center font-medium w-20">Aksi</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((d, i) => (
+              <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
+                <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
+                <td className="py-2.5 px-3 text-center">{d.skg || '-'}</td>
+                <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
+                {user && (
+                  <td className="py-2.5 px-3 text-center">
+                    {deleteId === d.id ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => handleDelete(d.id)} className="px-2 py-1 text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+                        <button onClick={() => setDeleteId(null)} className="px-2 py-1 text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
+                      </div>
+                    ) : (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
                           <Pencil className="h-3.5 w-3.5 text-primary" />
@@ -142,39 +151,23 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </button>
                       </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="bg-primary/5 font-semibold">
-                <td className="py-2.5 px-3" colSpan={2}>Total</td>
-                <td className="py-2.5 px-3 text-center">{totalSKG}</td>
-                <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
-                {user && <td />}
+                    )}
+                  </td>
+                )}
               </tr>
-            </tfoot>
-          </table>
-        </div>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-primary/5 font-semibold">
+              <td className="py-2.5 px-3" colSpan={2}>Total</td>
+              <td className="py-2.5 px-3 text-center">{totalSKG}</td>
+              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
+              {user && <td />}
+            </tr>
+          </tfoot>
+        </table>
       </div>
-
-      <SumberDanaForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
-
-      {/* Delete confirmation */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in" onClick={() => setDeleteId(null)}>
-          <div className="bg-card rounded-lg border border-border shadow-xl p-6 max-w-sm mx-4 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-semibold">Hapus Data?</h3>
-            <p className="text-sm text-muted-foreground">Data yang dihapus tidak dapat dikembalikan.</p>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
-              <button onClick={() => handleDelete(deleteId)} className="px-4 py-2 text-sm rounded-lg bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 
