@@ -2,6 +2,9 @@
   "projectId": "ff14d761-1334-4a2a-b9de-7f29984b1864",
   "createdAt": 1770958063092,
   "version": "1.0",
-  "startupCommands": ["bun install && bun run dev"],
-  "templateId": "any"
+  "startupCommands": [
+    "npm install; npm run dev"
+  ],
+  "templateId": "any",
+  "detectedFramework": "vite"
 }

@@ -1,4 +1,4 @@
-import { BarChart3, List, ArrowLeftRight, ClipboardList } from "lucide-react";
+import { List, ClipboardList, ArrowLeftRight, PieChart } from "lucide-react";
 
 interface BottomNavProps {
   active: string;
@@ -6,37 +6,63 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: "rekap", label: "Rekap", icon: BarChart3 },
-  { id: "donasi", label: "List Donasi", icon: List },
-  { id: "seksi", label: "Per Seksi", icon: ClipboardList },
+  { id: "donasi", label: "Donasi", icon: List },
+  { id: "seksi", label: "Seksi", icon: ClipboardList },
   { id: "transaksi", label: "Transaksi", icon: ArrowLeftRight },
+  { id: "grafik", label: "Grafik", icon: PieChart },
 ];
 
 const BottomNav = ({ active, onChange }: BottomNavProps) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-border bg-card/95 backdrop-blur-md shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
-      <div className="flex items-center justify-around">
-        {tabs.map((tab) => {
-          const isActive = active === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onChange(tab.id)}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 transition-colors ${
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              <div className={`rounded-full p-1.5 transition-colors ${isActive ? "bg-primary/10" : ""}`}>
-                <tab.icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : ""}`} />
-              </div>
-              <span className={`text-[10px] ${isActive ? "font-bold" : "font-medium"}`}>
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
+    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-border/50 bg-background/80 backdrop-blur-xl">
+      {/* Safe area + nav content */}
+      <div className="relative">
+        {/* Active indicator bar */}
+        <div
+          className="absolute top-0 h-[2.5px] bg-primary rounded-full transition-all duration-300 ease-out"
+          style={{
+            width: `${100 / tabs.length}%`,
+            left: `${(tabs.findIndex((t) => t.id === active) / tabs.length) * 100}%`,
+          }}
+        />
+
+        <div className="flex items-stretch">
+          {tabs.map((tab) => {
+            const isActive = active === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onChange(tab.id)}
+                className="flex flex-1 flex-col items-center gap-0.5 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-all duration-200 active:scale-95"
+              >
+                <div
+                  className={`relative flex items-center justify-center w-10 h-7 rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "bg-primary/12"
+                      : "bg-transparent"
+                  }`}
+                >
+                  <tab.icon
+                    className={`h-[18px] w-[18px] transition-all duration-200 ${
+                      isActive
+                        ? "text-primary stroke-[2.5]"
+                        : "text-muted-foreground/70 stroke-[1.8]"
+                    }`}
+                  />
+                </div>
+                <span
+                  className={`text-[10px] leading-tight transition-all duration-200 ${
+                    isActive
+                      ? "text-primary font-semibold"
+                      : "text-muted-foreground/70 font-medium"
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

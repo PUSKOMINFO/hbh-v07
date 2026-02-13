@@ -36,21 +36,21 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
   const totalAnggaran = anggaranSeksi.reduce((s, a) => s + a.anggaran, 0);
   const totalRealisasi = Object.values(realisasiMap).reduce((s, v) => s + v, 0);
 
-  return (
-    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "400ms" }}>
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <ClipboardList className="h-4.5 w-4.5 text-primary" />
-          <h2 className="text-base font-semibold">Ringkasan Anggaran per Seksi</h2>
+    return (
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-3 sm:p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 sm:h-[18px] sm:w-[18px] text-primary shrink-0" />
+            <h2 className="text-sm sm:text-base font-semibold">Ringkasan Anggaran per Seksi</h2>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
+            <span>Total Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
+            <span className="hidden sm:inline">·</span>
+            <span>Realisasi: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
+          </div>
         </div>
-        <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-          <span>Total Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
-          <span>·</span>
-          <span>Realisasi: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
-        </div>
-      </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-border">
           {anggaranSeksi.map((seksi) => {
             const realisasi = realisasiMap[seksi.nama_seksi] || 0;
             const persen = seksi.anggaran > 0 ? Math.round((realisasi / seksi.anggaran) * 100) : 0;

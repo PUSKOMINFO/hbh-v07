@@ -72,36 +72,36 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
     setFormOpen(true);
   };
 
-  return (
-    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "240ms" }}>
-      <div className="p-4 border-b border-border space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold">Sumber Dana Donasi</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
-          </div>
-          {user && (
-            <div className="flex items-center gap-2">
-              <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1.5 text-xs bg-accent text-accent-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                <DatabaseBackup className="h-3.5 w-3.5" /> {seeding ? "Seeding..." : "Seed Data"}
-              </button>
-              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
-                <Plus className="h-3.5 w-3.5" /> Tambah
-              </button>
+    return (
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-semibold">Sumber Dana Donasi</h2>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
             </div>
-          )}
+            {user && (
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-accent text-accent-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
+                  <DatabaseBackup className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{seeding ? "Seeding..." : "Seed Data"}</span><span className="sm:hidden">{seeding ? "..." : "Seed"}</span>
+                </button>
+                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                  <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Cari sumber donasi..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Cari sumber donasi..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-          />
-        </div>
-      </div>
 
       {/* Inline Form */}
       <SumberDanaForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />

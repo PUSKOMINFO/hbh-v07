@@ -14,6 +14,9 @@ interface TransaksiListProps {
 const formatRupiah = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
+const formatNumber = (n: number) =>
+  new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 }).format(n);
+
 const TransaksiList = ({ data }: TransaksiListProps) => {
   const { user } = useAuth();
   const [selectedProof, setSelectedProof] = useState<{ bukti?: any; keterangan: string } | null>(null);
@@ -60,41 +63,41 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
     setFormOpen(true);
   };
 
-  return (
-    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: "320ms" }}>
-      <div className="p-4 border-b border-border space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
-          {user && (
-            <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1.5 text-xs bg-primary text-primary-foreground rounded-lg px-3 py-2 hover:opacity-90 transition-opacity">
-              <Plus className="h-3.5 w-3.5" /> Tambah
-            </button>
-          )}
+    return (
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
+            {user && (
+              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity shrink-0">
+                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+              </button>
+            )}
+          </div>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-2 sm:p-4 shadow-md">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><ArrowDownLeft className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Masuk</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalMasuk)}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-2 sm:p-4 shadow-md">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Keluar</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalKeluar)}</p>
+              </div>
+              <div className={`rounded-xl p-2 sm:p-4 shadow-md ${(totalMasuk - totalKeluar) > 0 ? 'bg-gradient-to-br from-[hsl(210,75%,55%)] to-[hsl(210,70%,40%)]' : (totalMasuk - totalKeluar) < 0 ? 'bg-gradient-to-br from-[hsl(0,72%,55%)] to-[hsl(0,72%,42%)]' : 'bg-gradient-to-br from-[hsl(220,15%,50%)] to-[hsl(220,15%,38%)]'}`}>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                  <div className="rounded-md p-1 sm:p-2 bg-white/20 backdrop-blur-sm"><Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-white" /></div>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-white/80">Saldo</p>
+                </div>
+                <p className="text-[11px] sm:text-sm font-bold text-white truncate">{formatNumber(totalMasuk - totalKeluar)}</p>
+              </div>
+            </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-4 shadow-md flex items-center gap-3">
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><ArrowDownLeft className="h-5 w-5 text-white" /></div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Masuk</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk)}</p>
-            </div>
-          </div>
-          <div className="rounded-xl bg-gradient-to-br from-destructive/90 to-destructive p-4 shadow-md flex items-center gap-3">
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><ArrowUpRight className="h-5 w-5 text-white" /></div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Dana Keluar</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalKeluar)}</p>
-            </div>
-          </div>
-          <div className={`rounded-xl p-4 shadow-md flex items-center gap-3 ${(totalMasuk - totalKeluar) > 0 ? 'bg-gradient-to-br from-[hsl(210,75%,55%)] to-[hsl(210,70%,40%)]' : (totalMasuk - totalKeluar) < 0 ? 'bg-gradient-to-br from-[hsl(0,72%,55%)] to-[hsl(0,72%,42%)]' : 'bg-gradient-to-br from-[hsl(220,15%,50%)] to-[hsl(220,15%,38%)]'}`}>
-            <div className="rounded-lg p-2.5 bg-white/20 backdrop-blur-sm"><Wallet className="h-5 w-5 text-white" /></div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-white/70">Status Saldo</p>
-              <p className="text-lg sm:text-sm font-bold text-white whitespace-nowrap">{formatRupiah(totalMasuk - totalKeluar)}</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Inline Form */}
       <TransaksiForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
@@ -162,89 +165,95 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
           </div>
         )}
 
-        <div className="divide-y divide-border">
-          {paginatedData.map((t, idx) => {
-            const rowNum = (safeCurrentPage - 1) * pageSize + idx + 1;
-            return (
-              <div key={t.id} className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors">
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center shrink-0 text-xs font-bold ${t.jenis === "masuk" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                  {rowNum}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{t.keterangan}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                    {" · "}{t.kategori}
-                  </p>
-                </div>
-                {/* Bukti Thumbnail */}
-                <div className="shrink-0">
-                  {t.bukti ? (
-                    <button
-                      onClick={() => setSelectedProof({ bukti: t.bukti, keterangan: t.keterangan })}
-                      className="block rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:shadow-md transition-all"
-                      title="Lihat bukti"
-                    >
-                      {t.bukti.tipe === "image" ? (
-                        <img
-                          src={t.bukti.url}
-                          alt="Bukti"
-                          className="h-10 w-10 object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 flex items-center justify-center bg-muted">
-                          <FileText className="h-5 w-5 text-primary" />
-                        </div>
-                      )}
-                    </button>
-                  ) : (
-                    <div className="h-10 w-10 rounded-lg border border-dashed border-border flex items-center justify-center">
-                      <Image className="h-4 w-4 text-muted-foreground/40" />
+          <div className="divide-y divide-border">
+            {paginatedData.map((t, idx) => {
+              const rowNum = (safeCurrentPage - 1) * pageSize + idx + 1;
+              return (
+                <div key={t.id} className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors">
+                  <div className={`rounded-full h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${t.jenis === "masuk" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                    {rowNum}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium line-clamp-2 sm:truncate">{t.keterangan}</p>
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{t.kategori}</p>
                     </div>
-                  )}
-                </div>
-                {user && (
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button onClick={() => openEdit(t)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
-                      <Pencil className="h-3.5 w-3.5 text-primary" />
-                    </button>
-                    {deleteId === t.id ? (
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => handleDelete(t.id)} className="px-2 py-1 text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
-                        <button onClick={() => setDeleteId(null)} className="px-2 py-1 text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => setDeleteId(t.id)} className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    <p className={`text-xs sm:text-sm font-semibold mt-1 sm:hidden ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
+                      {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
+                    </p>
+                  </div>
+                  {/* Bukti Thumbnail */}
+                  <div className="shrink-0">
+                    {t.bukti ? (
+                      <button
+                        onClick={() => setSelectedProof({ bukti: t.bukti, keterangan: t.keterangan })}
+                        className="block rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:shadow-md transition-all"
+                        title="Lihat bukti"
+                      >
+                        {t.bukti.tipe === "image" ? (
+                          <img
+                            src={t.bukti.url}
+                            alt="Bukti"
+                            className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-muted">
+                            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          </div>
+                        )}
                       </button>
+                    ) : (
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg border border-dashed border-border flex items-center justify-center">
+                        <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/40" />
+                      </div>
                     )}
                   </div>
-                )}
-                <p className={`text-sm font-semibold whitespace-nowrap ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
-                  {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+                  {user && (
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <button onClick={() => openEdit(t)} className="p-1 sm:p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
+                        <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
+                      </button>
+                      {deleteId === t.id ? (
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleDelete(t.id)} className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+                          <button onClick={() => setDeleteId(null)} className="px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setDeleteId(t.id)} className="p-1 sm:p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
+                          <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-destructive" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <p className={`text-sm font-semibold whitespace-nowrap hidden sm:block ${t.jenis === "masuk" ? "text-success" : "text-destructive"}`}>
+                    {t.jenis === "masuk" ? "+" : "-"}{formatRupiah(t.nominal)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-between gap-3 p-4 border-t border-border bg-muted/30">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Rows:</span>
+        <div className="flex items-center justify-between gap-2 p-3 sm:p-4 border-t border-border bg-muted/30">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Rows:</span>
             <select
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-              className="text-xs border border-border rounded-md px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-primary"
+              className="text-[10px] sm:text-xs border border-border rounded-md px-1.5 sm:px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
             </select>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              {(safeCurrentPage - 1) * pageSize + 1}-{Math.min(safeCurrentPage * pageSize, sorted.length)} dari {sorted.length}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              {(safeCurrentPage - 1) * pageSize + 1}-{Math.min(safeCurrentPage * pageSize, sorted.length)} / {sorted.length}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

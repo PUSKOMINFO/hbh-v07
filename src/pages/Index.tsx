@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import SummaryCards from "@/components/SummaryCards";
 import SumberDanaTable from "@/components/SumberDanaTable";
 import TransaksiList from "@/components/TransaksiList";
@@ -8,8 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut } from "lucide-react";
+import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart } from "lucide-react";
+import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -22,23 +24,7 @@ const Index = () => {
   const tahunHbh = settings?.tahun_hbh || "2026";
 
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
-  const [activeSection, setActiveSection] = useState("rekap");
-
-    const rekapRef = useRef<HTMLDivElement>(null);
-    const donasiRef = useRef<HTMLDivElement>(null);
-    const seksiRef = useRef<HTMLDivElement>(null);
-    const transaksiRef = useRef<HTMLDivElement>(null);
-
-    const handleNav = (section: string) => {
-      setActiveSection(section);
-      const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
-        rekap: rekapRef,
-        donasi: donasiRef,
-        seksi: seksiRef,
-        transaksi: transaksiRef,
-      };
-      refMap[section]?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
+  const [activeTab, setActiveTab] = useState("donasi");
 
   // Map DB rows to component-expected shape
   const mappedSumberDana = sumberDana.map((d) => ({
@@ -62,18 +48,33 @@ const Index = () => {
 
   const isLoading = sdLoading || trLoading || settingsLoading;
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "donasi":
+        return <SumberDanaTable data={mappedSumberDana} />;
+      case "seksi":
+        return <AnggaranSeksiCard transaksi={transaksi} />;
+      case "transaksi":
+        return <TransaksiList data={mappedTransaksi} />;
+      case "grafik":
+        return <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
-        <div className="container max-w-3xl py-5">
+        <div className="container max-w-3xl py-4 sm:py-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary-foreground/15 p-2">
-              <BookOpen className="h-6 w-6" />
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold leading-tight">Halal Bi Halal {tahunHbh}</h1>
-              <p className="text-xs opacity-80">Majelis Dzikir Tasbih Indonesia</p>
+              <h1 className="text-base sm:text-lg font-bold leading-tight">Halal Bi Halal {tahunHbh}</h1>
+              <p className="text-[11px] sm:text-xs opacity-80">Majelis Dzikir Tasbih Indonesia</p>
             </div>
             {!authLoading && (
               user ? (
@@ -82,7 +83,7 @@ const Index = () => {
                   className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />
-                  Keluar
+                  <span className="hidden sm:inline">Keluar</span>
                 </button>
               ) : (
                 <button
@@ -90,7 +91,7 @@ const Index = () => {
                   className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
                 >
                   <LogIn className="h-3.5 w-3.5" />
-                  Login
+                  <span className="hidden sm:inline">Login</span>
                 </button>
               )
             )}
@@ -99,38 +100,81 @@ const Index = () => {
       </header>
 
       {/* Content */}
-      <main className="container max-w-3xl py-4 space-y-4 pb-24 sm:pb-8">
+      <main className="container max-w-3xl py-3 sm:py-4 space-y-3 sm:space-y-4 pb-20 sm:pb-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : (
           <>
-            <div ref={rekapRef} className="scroll-mt-4">
-              <SummaryCards targetDonasi={targetDonasi} realisasi={realisasi} />
+            <SummaryCards targetDonasi={targetDonasi} realisasi={realisasi} />
+
+            {/* Desktop: inline tabs */}
+            <div className="hidden sm:block">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full h-auto p-1 bg-muted/60 rounded-xl grid grid-cols-4 gap-1">
+                  <TabsTrigger
+                    value="donasi"
+                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                  >
+                    <List className="h-4 w-4 shrink-0" />
+                    <span>Donasi</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="seksi"
+                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                  >
+                    <ClipboardList className="h-4 w-4 shrink-0" />
+                    <span>Seksi</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="transaksi"
+                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                  >
+                    <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                    <span>Transaksi</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="grafik"
+                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                  >
+                    <PieChart className="h-4 w-4 shrink-0" />
+                    <span>Grafik</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="donasi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                  <SumberDanaTable data={mappedSumberDana} />
+                </TabsContent>
+                <TabsContent value="seksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                  <AnggaranSeksiCard transaksi={transaksi} />
+                </TabsContent>
+                <TabsContent value="transaksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                  <TransaksiList data={mappedTransaksi} />
+                </TabsContent>
+                <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                  <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
+                </TabsContent>
+              </Tabs>
             </div>
-            <div ref={donasiRef} className="scroll-mt-4">
-              <SumberDanaTable data={mappedSumberDana} />
-            </div>
-            <div ref={seksiRef} className="scroll-mt-4">
-                <AnggaranSeksiCard transaksi={transaksi} />
-              </div>
-            <div ref={transaksiRef} className="scroll-mt-4 space-y-4">
-                <TransaksiList data={mappedTransaksi} />
+
+            {/* Mobile: content only (tabs via BottomNav) */}
+            <div className="sm:hidden">
+              {renderTabContent()}
             </div>
           </>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-4 hidden sm:block">
+      {/* Footer - hidden on mobile to avoid overlap with bottom nav */}
+      <footer className="hidden sm:block border-t border-border py-4">
         <p className="text-center text-xs text-muted-foreground">
-          © {tahunHbh} Panitia Halal Bi Halal — Majelis Dzikir Tasbih Indonesia
+          &copy; {tahunHbh} Panitia Halal Bi Halal &mdash; Majelis Dzikir Tasbih Indonesia
         </p>
       </footer>
 
-      {/* Mobile Bottom Nav */}
-      <BottomNav active={activeSection} onChange={handleNav} />
+      {/* Mobile bottom navigation */}
+      <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );
 };
