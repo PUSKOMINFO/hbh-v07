@@ -33,7 +33,6 @@ const Index = () => {
   const mappedSumberDana = sumberDana.map((d) => ({
     id: d.id,
     namaCabang: d.nama_cabang,
-    sumberLain: d.sumber_lain,
     skg: d.skg,
     nominal: d.nominal,
   }));

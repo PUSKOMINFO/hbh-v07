@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useSumberDana } from "@/hooks/useSumberDana";
 import { X } from "lucide-react";
 import { z } from "zod";
 
@@ -45,8 +46,15 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: sumberDana = [] } = useSumberDana();
 
   if (!isOpen) return null;
+
+  // Build kategori options from sumber_dana for "masuk"
+  const sumberDonasiOptions = sumberDana
+    .map((s) => s.nama_cabang)
+    .filter((name) => name.trim() !== "")
+    .sort();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,8 +141,21 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
               {errors.nominal && <p className="text-xs text-destructive">{errors.nominal}</p>}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Kategori</label>
-              <input value={kategori} onChange={(e) => setKategori(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={100} placeholder="Donasi Cabang" />
+              <label className="text-sm font-medium">{jenis === "masuk" ? "Sumber Donasi" : "Kategori"}</label>
+              {jenis === "masuk" ? (
+                <select
+                  value={kategori}
+                  onChange={(e) => setKategori(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">-- Pilih Sumber --</option>
+                  {sumberDonasiOptions.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input value={kategori} onChange={(e) => setKategori(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={100} placeholder="Operasional" />
+              )}
             </div>
           </div>
 
