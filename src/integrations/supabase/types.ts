@@ -91,7 +91,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      recalculate_sumber_dana_nominal: {
+        Args: { source_name: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
