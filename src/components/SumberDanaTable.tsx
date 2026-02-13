@@ -4,8 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, DatabaseBackup } from "lucide-react";
-import { seedDataSumberDana } from "@/lib/seedSumberDana";
+import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, DatabaseBackup, Download, FileText } from "lucide-react";
+import { exportSumberDanaXlsx, printSumberDanaPdf } from "@/lib/exportUtils";
 import SumberDanaForm from "./SumberDanaForm";
 
 interface SumberDanaTableProps {
@@ -22,24 +22,8 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null);
-  const [seeding, setSeeding] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      await supabase.from("sumber_dana").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      const { error } = await supabase.from("sumber_dana").insert(seedDataSumberDana);
-      if (error) throw error;
-      toast({ title: "Berhasil", description: "Data donasi berhasil di-seed" });
-      queryClient.invalidateQueries({ queryKey: ["sumber_dana"] });
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   const filtered = useMemo(() => {
     let result = data.filter((d) => {
@@ -80,16 +64,28 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               <h2 className="text-sm sm:text-base font-semibold">Sumber Dana Donasi</h2>
               <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
             </div>
-            {user && (
               <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <button onClick={handleSeed} disabled={seeding} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-accent text-accent-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                  <DatabaseBackup className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">{seeding ? "Seeding..." : "Seed Data"}</span><span className="sm:hidden">{seeding ? "..." : "Seed"}</span>
-                </button>
-                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
-                  <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
-                </button>
+              {user && (
+                    <>
+                      <button onClick={() => exportSumberDanaXlsx(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                        <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Excel</span>
+                      </button>
+                      <button onClick={() => printSumberDanaPdf(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-red-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                        <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">PDF</span>
+                      </button>
+                    </>
+                  )}
+                  {user && (
+                  <>
+                    <button disabled className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-accent text-accent-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 opacity-50 cursor-not-allowed">
+                        <DatabaseBackup className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Seed Data</span><span className="sm:hidden">Seed</span>
+                      </button>
+                    <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                      <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+                    </button>
+                  </>
+                )}
               </div>
-            )}
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

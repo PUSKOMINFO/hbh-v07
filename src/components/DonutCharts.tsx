@@ -3,7 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { TransaksiRow } from "@/hooks/useTransaksi";
 import { SumberDanaRow } from "@/hooks/useSumberDana";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
-import { TrendingUp, TrendingDown, ArrowDownUp } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { TrendingUp, TrendingDown, ArrowDownUp, FileText } from "lucide-react";
+import { printGrafikPdf } from "@/lib/exportUtils";
 
 interface DonutChartsProps {
   transaksi: TransaksiRow[];
@@ -53,6 +55,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 
 const DonutCharts = ({ transaksi, sumberDana }: DonutChartsProps) => {
   const { data: anggaranSeksi = [] } = useAnggaranSeksi();
+  const { user } = useAuth();
 
   // 1. Dana Masuk vs Keluar
   const { masukKeluarData, totalMasuk, totalKeluar } = useMemo(() => {
@@ -103,9 +106,22 @@ const DonutCharts = ({ transaksi, sumberDana }: DonutChartsProps) => {
     );
   }
 
-  return (
-    <div className="space-y-3">
-      {/* Chart 1: Dana Masuk vs Keluar */}
+    return (
+      <div className="space-y-3">
+        {/* PDF Button for authenticated users */}
+        {user && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => printGrafikPdf({ totalMasuk, totalKeluar, seksiData, sumberData })}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 border border-red-200 transition-colors"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Print PDF
+            </button>
+          </div>
+        )}
+
+        {/* Chart 1: Dana Masuk vs Keluar */}
       <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-3 sm:p-4 border-b border-border">
           <div className="flex items-center gap-2">

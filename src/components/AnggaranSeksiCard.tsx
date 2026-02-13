@@ -1,7 +1,9 @@
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
 import { TransaksiRow } from "@/hooks/useTransaksi";
-import { ChevronDown, ChevronUp, ClipboardList, Search, Filter, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { ChevronDown, ChevronUp, ClipboardList, Search, Filter, X, FileText } from "lucide-react";
 import { useState } from "react";
+import { printSeksiPdf } from "@/lib/exportUtils";
 
 interface AnggaranSeksiCardProps {
   transaksi: TransaksiRow[];
@@ -21,6 +23,7 @@ const formatRupiah = (n: number) =>
 
 const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
   const { data: anggaranSeksi = [], isLoading } = useAnggaranSeksi();
+  const { user } = useAuth();
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("semua");
@@ -80,11 +83,28 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
       <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-3 sm:p-4 border-b border-border">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 sm:h-[18px] sm:w-[18px] text-primary shrink-0" />
-              <h2 className="text-sm sm:text-base font-semibold">Ringkasan Anggaran per Seksi</h2>
-            </div>
-            <button
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 sm:h-[18px] sm:w-[18px] text-primary shrink-0" />
+                <h2 className="text-sm sm:text-base font-semibold">Ringkasan Anggaran per Seksi</h2>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {user && (
+                  <button
+                    onClick={() => {
+                      const items = anggaranSeksi.map((seksi) => ({
+                        nama_seksi: seksi.nama_seksi,
+                        anggaran: seksi.anggaran,
+                        realisasi: realisasiMap[seksi.nama_seksi] || 0,
+                      }));
+                      printSeksiPdf(items);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] sm:text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    <span className="hidden sm:inline">PDF</span>
+                  </button>
+                )}
+                <button
               onClick={() => setShowFilters(!showFilters)}
               className={`relative flex items-center gap-1 px-2 py-1 rounded-md text-[11px] sm:text-xs font-medium transition-colors ${
                 showFilters || hasActiveFilter
@@ -97,9 +117,10 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
               {hasActiveFilter && (
                 <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
               )}
-            </button>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
+              </button>
+              </div>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
             <span>Total Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
             <span className="hidden sm:inline">·</span>
             <span>Realisasi: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
@@ -165,11 +186,11 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
             <div className="col-span-full bg-card p-6 flex flex-col items-center justify-center gap-1 text-center">
               <Search className="h-5 w-5 text-muted-foreground/50" />
               <p className="text-xs text-muted-foreground">Tidak ada seksi yang sesuai filter</p>
-              <button onClick={clearFilters} className="text-[11px] text-primary hover:underline font-medium mt-1">
-                Reset Filter
-              </button>
-            </div>
-          )}
+                <button onClick={clearFilters} className="text-[11px] text-primary hover:underline font-medium mt-1">
+                  Reset Filter
+                </button>
+                </div>
+            )}
             {filteredSeksi.map((seksi) => {
               const realisasi = realisasiMap[seksi.nama_seksi] || 0;
               const isLainnya = seksi.nama_seksi === "Lainnya" && seksi.anggaran === 0;

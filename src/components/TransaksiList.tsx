@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2, X, Image, ChevronLeft, ChevronRight, Search, Filter, RotateCcw } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileText, Wallet, Plus, Pencil, Trash2, X, Image, ChevronLeft, ChevronRight, Search, Filter, RotateCcw, Download, Printer } from "lucide-react";
+import { exportTransaksiXlsx, printTransaksiPdf } from "@/lib/exportUtils";
 import TransaksiForm from "./TransaksiForm";
 
 interface TransaksiListProps {
@@ -104,11 +105,23 @@ const TransaksiList = ({ data }: TransaksiListProps) => {
         <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm sm:text-base font-semibold">Laporan Dana Masuk & Keluar</h2>
-            {user && (
-              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity shrink-0">
-                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
-              </button>
-            )}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {user && (
+                  <>
+                    <button onClick={() => exportTransaksiXlsx(data)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                      <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Excel</span>
+                    </button>
+                    <button onClick={() => printTransaksiPdf(data)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-red-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                      <Printer className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">PDF</span>
+                    </button>
+                  </>
+                )}
+                {user && (
+                <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity shrink-0">
+                  <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+                </button>
+              )}
+            </div>
           </div>
             <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               <div className="rounded-xl bg-gradient-to-br from-[hsl(152,60%,45%)] to-[hsl(152,65%,30%)] p-2 sm:p-4 shadow-md">

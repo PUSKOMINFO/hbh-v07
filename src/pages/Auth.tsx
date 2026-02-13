@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Mail, Lock, LogIn } from "lucide-react";
+import { BookOpen, Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const Auth = () => {
             <BookOpen className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-xl font-bold">Login Panitia</h1>
-          <p className="text-sm text-muted-foreground">Halal Bi Halal 2025 — MDTI</p>
+          <p className="text-sm text-muted-foreground">Halal Bi Halal 2026 — MDTI</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,18 +61,25 @@ const Auth = () => {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-10 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
           </div>
 
           <button
@@ -84,12 +92,14 @@ const Auth = () => {
           </button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
-          {isSignUp ? "Sudah punya akun?" : "Belum punya akun?"}{" "}
-          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium hover:underline">
-            {isSignUp ? "Masuk" : "Daftar"}
-          </button>
-        </p>
+          {isSignUp && (
+            <p className="text-center text-sm text-muted-foreground">
+              Sudah punya akun?{" "}
+              <button onClick={() => setIsSignUp(false)} className="text-primary font-medium hover:underline">
+                Masuk
+              </button>
+            </p>
+          )}
       </div>
     </div>
   );
