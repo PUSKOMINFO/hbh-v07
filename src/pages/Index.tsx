@@ -51,6 +51,54 @@ const Index = () => {
 
   const isLoading = sdLoading || trLoading || settingsLoading;
 
+  const handlePrintAll = async () => {
+    // Build realisasi map for seksi
+    const realisasiMap: Record<string, number> = {};
+    transaksi
+      .filter((t) => t.jenis === "keluar")
+      .forEach((t) => {
+        realisasiMap[t.kategori] = (realisasiMap[t.kategori] || 0) + t.nominal;
+      });
+
+    const seksiItems = anggaranSeksi.map((s) => ({
+      nama_seksi: s.nama_seksi,
+      anggaran: s.anggaran,
+      realisasi: realisasiMap[s.nama_seksi] || 0,
+    }));
+
+    let totalMasuk = 0;
+    let totalKeluar = 0;
+    transaksi.forEach((t) => {
+      if (t.jenis === "masuk") totalMasuk += t.nominal;
+      else totalKeluar += t.nominal;
+    });
+
+    const seksiChartMap: Record<string, number> = {};
+    transaksi
+      .filter((t) => t.jenis === "keluar")
+      .forEach((t) => {
+        const key = t.kategori || "Lainnya";
+        seksiChartMap[key] = (seksiChartMap[key] || 0) + t.nominal;
+      });
+    const seksiData = Object.entries(seksiChartMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const sumberData = sumberDana
+      .filter((s) => s.nominal > 0)
+      .map((s) => ({ name: s.nama_cabang, value: s.nominal }))
+      .sort((a, b) => b.value - a.value);
+
+    await printAllPdf({
+      targetDonasi,
+      realisasi,
+      sumberDana: mappedSumberDana,
+      seksiItems,
+      transaksi: mappedTransaksi,
+      grafikData: { totalMasuk, totalKeluar, seksiData, sumberData },
+    });
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "donasi":
