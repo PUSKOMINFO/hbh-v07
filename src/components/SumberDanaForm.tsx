@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,14 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isOpen) {
+      setNamaCabang(editData?.nama_cabang || "");
+      setSkg(editData?.skg?.toString() || "0");
+      setErrors({});
+    }
+  }, [isOpen, editData]);
 
   if (!isOpen) return null;
 
@@ -66,28 +74,31 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 animate-fade-in" onClick={onClose}>
-      <div className="w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-lg border border-border shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="font-semibold">{editData ? "Edit Sumber Donasi" : "Tambah Sumber Donasi"}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors"><X className="h-5 w-5" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="p-4 space-y-3">
+    <div className="border-t border-border bg-muted/30 animate-fade-in">
+      <div className="flex items-center justify-between p-3 border-b border-border">
+        <h3 className="text-sm font-semibold">{editData ? "Edit Sumber Donasi" : "Tambah Sumber Donasi"}</h3>
+        <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
+      </div>
+      <form onSubmit={handleSubmit} className="p-3 space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-sm font-medium">Sumber Donasi *</label>
-            <input value={namaCabang} onChange={(e) => setNamaCabang(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={200} required />
+            <label className="text-xs font-medium">Sumber Donasi *</label>
+            <input value={namaCabang} onChange={(e) => setNamaCabang(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={200} required />
             {errors.nama_cabang && <p className="text-xs text-destructive">{errors.nama_cabang}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium">SKG</label>
-            <input type="number" value={skg} onChange={(e) => setSkg(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={0} />
+            <label className="text-xs font-medium">SKG</label>
+            <input type="number" value={skg} onChange={(e) => setSkg(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={0} />
             {errors.skg && <p className="text-xs text-destructive">{errors.skg}</p>}
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground rounded-lg py-2.5 font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
-            {loading ? "Menyimpan..." : editData ? "Simpan Perubahan" : "Tambah"}
+        </div>
+        <div className="flex gap-2 justify-end">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-xs rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
+          <button type="submit" disabled={loading} className="px-4 py-2 text-xs bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+            {loading ? "Menyimpan..." : editData ? "Simpan" : "Tambah"}
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
