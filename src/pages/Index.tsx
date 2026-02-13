@@ -20,6 +20,7 @@ const Index = () => {
   const { data: sumberDana = [], isLoading: sdLoading } = useSumberDana();
   const { data: transaksi = [], isLoading: trLoading } = useTransaksi();
   const { data: settings, isLoading: settingsLoading } = useAppSettings();
+  const { data: anggaranSeksi = [] } = useAnggaranSeksi();
   const navigate = useNavigate();
 
   const targetDonasi = Number(settings?.target_donasi || 101050000);
