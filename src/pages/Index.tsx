@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import SummaryCards from "@/components/SummaryCards";
 import SumberDanaTable from "@/components/SumberDanaTable";
 import TransaksiList from "@/components/TransaksiList";
+import AnggaranSeksiCard from "@/components/AnggaranSeksiCard";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
@@ -105,7 +106,8 @@ const Index = () => {
             <div ref={donasiRef} className="scroll-mt-4">
               <SumberDanaTable data={mappedSumberDana} />
             </div>
-            <div ref={transaksiRef} className="scroll-mt-4">
+            <div ref={transaksiRef} className="scroll-mt-4 space-y-4">
+              <AnggaranSeksiCard transaksi={transaksi} />
               <TransaksiList data={mappedTransaksi} />
             </div>
           </>
