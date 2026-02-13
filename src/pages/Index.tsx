@@ -127,15 +127,25 @@ const Index = () => {
               <h1 className="text-base sm:text-lg font-bold leading-tight">Halal Bi Halal {tahunHbh}</h1>
               <p className="text-[11px] sm:text-xs opacity-80">Majelis Dzikir Tasbih Indonesia</p>
             </div>
-            {!authLoading && (
-              user ? (
-                <button
-                  onClick={() => signOut()}
-                  className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Keluar</span>
-                </button>
+              {!authLoading && (
+                user ? (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={handlePrintAll}
+                      className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
+                      title="Print All PDF"
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Print All</span>
+                    </button>
+                    <button
+                      onClick={() => signOut()}
+                      className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Keluar</span>
+                    </button>
+                  </div>
               ) : (
                 <button
                   onClick={() => navigate("/auth")}
