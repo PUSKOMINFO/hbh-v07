@@ -8,19 +8,17 @@ import { z } from "zod";
 const schema = z.object({
   nama_cabang: z.string().trim().min(1, "Sumber donasi wajib diisi").max(200),
   skg: z.number().int().min(0).max(99999),
-  nominal: z.number().int().min(0).max(999999999999),
 });
 
 interface SumberDanaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  editData?: { id: string; nama_cabang: string; skg: number; nominal: number } | null;
+  editData?: { id: string; nama_cabang: string; skg: number } | null;
 }
 
 const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
   const [namaCabang, setNamaCabang] = useState(editData?.nama_cabang || "");
   const [skg, setSkg] = useState(editData?.skg?.toString() || "0");
-  const [nominal, setNominal] = useState(editData?.nominal?.toString() || "0");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
@@ -35,7 +33,6 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
     const parsed = schema.safeParse({
       nama_cabang: namaCabang,
       skg: parseInt(skg) || 0,
-      nominal: parseInt(nominal) || 0,
     });
 
     if (!parsed.success) {
@@ -51,7 +48,6 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
     const payload = {
       nama_cabang: parsed.data.nama_cabang,
       skg: parsed.data.skg,
-      nominal: parsed.data.nominal,
     };
 
     const { error } = editData
@@ -82,17 +78,10 @@ const SumberDanaForm = ({ isOpen, onClose, editData }: SumberDanaFormProps) => {
             <input value={namaCabang} onChange={(e) => setNamaCabang(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={200} required />
             {errors.nama_cabang && <p className="text-xs text-destructive">{errors.nama_cabang}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">SKG</label>
-              <input type="number" value={skg} onChange={(e) => setSkg(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={0} />
-              {errors.skg && <p className="text-xs text-destructive">{errors.skg}</p>}
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Nominal (Rp)</label>
-              <input type="number" value={nominal} onChange={(e) => setNominal(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={0} />
-              {errors.nominal && <p className="text-xs text-destructive">{errors.nominal}</p>}
-            </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium">SKG</label>
+            <input type="number" value={skg} onChange={(e) => setSkg(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" min={0} />
+            {errors.skg && <p className="text-xs text-destructive">{errors.skg}</p>}
           </div>
           <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground rounded-lg py-2.5 font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
             {loading ? "Menyimpan..." : editData ? "Simpan Perubahan" : "Tambah"}
