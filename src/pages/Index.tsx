@@ -24,15 +24,21 @@ const Index = () => {
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
   const [activeSection, setActiveSection] = useState("rekap");
 
-  const rekapRef = useRef<HTMLDivElement>(null);
-  const donasiRef = useRef<HTMLDivElement>(null);
-  const transaksiRef = useRef<HTMLDivElement>(null);
+    const rekapRef = useRef<HTMLDivElement>(null);
+    const donasiRef = useRef<HTMLDivElement>(null);
+    const seksiRef = useRef<HTMLDivElement>(null);
+    const transaksiRef = useRef<HTMLDivElement>(null);
 
-  const handleNav = (section: string) => {
-    setActiveSection(section);
-    const ref = section === "rekap" ? rekapRef : section === "donasi" ? donasiRef : transaksiRef;
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+    const handleNav = (section: string) => {
+      setActiveSection(section);
+      const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
+        rekap: rekapRef,
+        donasi: donasiRef,
+        seksi: seksiRef,
+        transaksi: transaksiRef,
+      };
+      refMap[section]?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
 
   // Map DB rows to component-expected shape
   const mappedSumberDana = sumberDana.map((d) => ({
@@ -106,9 +112,11 @@ const Index = () => {
             <div ref={donasiRef} className="scroll-mt-4">
               <SumberDanaTable data={mappedSumberDana} />
             </div>
+            <div ref={seksiRef} className="scroll-mt-4">
+                <AnggaranSeksiCard transaksi={transaksi} />
+              </div>
             <div ref={transaksiRef} className="scroll-mt-4 space-y-4">
-              <AnggaranSeksiCard transaksi={transaksi} />
-              <TransaksiList data={mappedTransaksi} />
+                <TransaksiList data={mappedTransaksi} />
             </div>
           </>
         )}

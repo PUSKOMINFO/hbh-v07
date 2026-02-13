@@ -1,4 +1,4 @@
-import { BarChart3, List, ArrowLeftRight } from "lucide-react";
+import { BarChart3, List, ArrowLeftRight, ClipboardList } from "lucide-react";
 
 interface BottomNavProps {
   active: string;
@@ -8,6 +8,7 @@ interface BottomNavProps {
 const tabs = [
   { id: "rekap", label: "Rekap", icon: BarChart3 },
   { id: "donasi", label: "List Donasi", icon: List },
+  { id: "seksi", label: "Per Seksi", icon: ClipboardList },
   { id: "transaksi", label: "Transaksi", icon: ArrowLeftRight },
 ];
 

@@ -12,7 +12,16 @@ const formatRupiah = (n: number) =>
 
 const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
   const { data: anggaranSeksi = [], isLoading } = useAnggaranSeksi();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (isLoading) return null;
 
@@ -41,27 +50,33 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
         </div>
       </div>
 
-      <div className="divide-y divide-border">
-        {anggaranSeksi.map((seksi) => {
-          const realisasi = realisasiMap[seksi.nama_seksi] || 0;
-          const persen = seksi.anggaran > 0 ? Math.round((realisasi / seksi.anggaran) * 100) : 0;
-          const isOver = realisasi > seksi.anggaran;
-          const isExpanded = expandedId === seksi.id;
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border">
+          {anggaranSeksi.map((seksi) => {
+            const realisasi = realisasiMap[seksi.nama_seksi] || 0;
+            const persen = seksi.anggaran > 0 ? Math.round((realisasi / seksi.anggaran) * 100) : 0;
+            const isOver = realisasi > seksi.anggaran;
+            const isCollapsed = collapsedIds.has(seksi.id);
 
-          // Get detail transactions for this seksi
-          const detailTransaksi = transaksi.filter(
-            (t) => t.jenis === "keluar" && t.kategori === seksi.nama_seksi
-          );
+            // Get detail transactions for this seksi
+            const detailTransaksi = transaksi.filter(
+              (t) => t.jenis === "keluar" && t.kategori === seksi.nama_seksi
+            );
 
-          return (
-            <div key={seksi.id}>
-              <button
-                onClick={() => setExpandedId(isExpanded ? null : seksi.id)}
-                className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-left"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{seksi.nama_seksi}</p>
-                  <div className="mt-1.5 flex items-center gap-2">
+            return (
+              <div key={seksi.id} className="bg-card flex flex-col">
+                <button
+                  onClick={() => toggleCollapse(seksi.id)}
+                  className="w-full flex flex-col gap-1.5 p-3 hover:bg-muted/50 transition-colors text-left"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <p className="text-xs font-medium truncate">{seksi.nama_seksi}</p>
+                    {detailTransaksi.length > 0 && (
+                      isCollapsed
+                        ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        : <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    )}
+                  </div>
+                  <div className="w-full flex items-center gap-1.5">
                     <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
@@ -74,50 +89,50 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                         style={{ width: `${Math.min(persen, 100)}%` }}
                       />
                     </div>
-                    <span className={`text-[11px] font-semibold whitespace-nowrap ${isOver ? "text-destructive" : "text-muted-foreground"}`}>
+                    <span className={`text-[10px] font-semibold whitespace-nowrap ${isOver ? "text-destructive" : "text-muted-foreground"}`}>
                       {persen}%
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex flex-col text-[10px] text-muted-foreground leading-tight">
                     <span>{formatRupiah(realisasi)}</span>
-                    <span className="text-muted-foreground/50">/</span>
-                    <span>{formatRupiah(seksi.anggaran)}</span>
+                    <span className="text-muted-foreground/60">/ {formatRupiah(seksi.anggaran)}</span>
                     {isOver && (
-                      <span className="text-destructive font-semibold ml-1">
-                        (+{formatRupiah(realisasi - seksi.anggaran)})
+                      <span className="text-destructive font-semibold">
+                        +{formatRupiah(realisasi - seksi.anggaran)}
                       </span>
                     )}
                   </div>
-                </div>
-                {detailTransaksi.length > 0 && (
-                  isExpanded
-                    ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-                    : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                )}
-              </button>
+                </button>
 
-              {/* Expanded detail */}
-              {isExpanded && detailTransaksi.length > 0 && (
-                <div className="bg-muted/30 border-t border-border px-4 py-2 space-y-1.5">
-                  {detailTransaksi.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between text-xs">
-                      <div className="min-w-0 flex-1">
-                        <span className="text-foreground">{t.keterangan}</span>
-                        <span className="text-muted-foreground ml-2">
+                {/* Detail items - shown by default, collapsible */}
+                {!isCollapsed && detailTransaksi.length > 0 && (
+                  <div className="bg-muted/30 border-t border-border px-3 py-2 space-y-1.5 flex-1">
+                    {detailTransaksi.map((t) => (
+                      <div key={t.id} className="text-[10px]">
+                        <div className="flex items-start justify-between gap-1">
+                          <span className="text-foreground leading-tight">{t.keterangan}</span>
+                          <span className="text-destructive font-medium whitespace-nowrap">
+                            -{formatRupiah(t.nominal)}
+                          </span>
+                        </div>
+                        <span className="text-muted-foreground">
                           {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
                         </span>
                       </div>
-                      <span className="text-destructive font-medium whitespace-nowrap ml-2">
-                        -{formatRupiah(t.nominal)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {detailTransaksi.length === 0 && (
+                  <div className="bg-muted/20 border-t border-border px-3 py-2 flex-1 flex items-center justify-center">
+                    <span className="text-[10px] text-muted-foreground/50 italic">Belum ada transaksi</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
     </div>
   );
 };

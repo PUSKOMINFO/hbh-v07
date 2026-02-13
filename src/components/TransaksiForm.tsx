@@ -1,11 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
-import { X } from "lucide-react";
+import { X, Upload, FileImage, Trash2 } from "lucide-react";
 import { z } from "zod";
+
+const storageClient = createClient(
+  import.meta.env.VITE_SUPABASE_STORAGE_URL,
+  import.meta.env.VITE_SUPABASE_STORAGE_KEY
+);
 
 const schema = z.object({
   tanggal: z.string().min(1, "Tanggal wajib diisi"),
@@ -13,7 +19,7 @@ const schema = z.object({
   jenis: z.enum(["masuk", "keluar"]),
   nominal: z.number().int().min(1, "Nominal harus > 0").max(999999999999),
   kategori: z.string().max(100).optional(),
-  bukti_url: z.string().url("URL tidak valid").max(500).optional().or(z.literal("")),
+  bukti_url: z.string().max(500).optional().or(z.literal("")),
   bukti_tipe: z.string().max(50).optional(),
   bukti_keterangan: z.string().max(300).optional(),
 });
@@ -54,6 +60,10 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
   const [buktiKeterangan, setBuktiKeterangan] = useState(editData?.bukti_keterangan || "");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: sumberDana = [] } = useSumberDana();
@@ -71,6 +81,8 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
       setBuktiTipe(editData?.bukti_tipe || "image");
       setBuktiKeterangan(editData?.bukti_keterangan || "");
       setSelectedSeksi(editData?.kategori || "");
+      setSelectedFile(null);
+      setFilePreview(editData?.bukti_url || null);
       setErrors({});
     }
   }, [isOpen, editData]);
@@ -89,11 +101,66 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({ title: "Error", description: "Ukuran file maksimal 5MB", variant: "destructive" });
+      return;
+    }
+    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Error", description: "Format file: JPG, PNG, WebP, atau PDF", variant: "destructive" });
+      return;
+    }
+    setSelectedFile(file);
+    if (file.type.startsWith("image/")) {
+      setFilePreview(URL.createObjectURL(file));
+      setBuktiTipe("image");
+    } else {
+      setFilePreview(null);
+      setBuktiTipe("document");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    setBuktiUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+    const { error } = await storageClient.storage.from("bukti").upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+    if (error) {
+      toast({ title: "Upload gagal", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data: urlData } = storageClient.storage.from("bukti").getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
     const nominalValue = parseInt(parseRibuan(nominalDisplay)) || 0;
+
+    // Upload file first if selected
+    let finalBuktiUrl = buktiUrl;
+    if (selectedFile) {
+      setUploading(true);
+      const url = await uploadFile(selectedFile);
+      setUploading(false);
+      if (!url) return;
+      finalBuktiUrl = url;
+    }
 
     const parsed = schema.safeParse({
       tanggal,
@@ -101,9 +168,9 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
       jenis,
       nominal: nominalValue,
       kategori: kategori || undefined,
-      bukti_url: buktiUrl || undefined,
-      bukti_tipe: buktiUrl ? buktiTipe : undefined,
-      bukti_keterangan: buktiUrl ? buktiKeterangan : undefined,
+      bukti_url: finalBuktiUrl || undefined,
+      bukti_tipe: finalBuktiUrl ? buktiTipe : undefined,
+      bukti_keterangan: finalBuktiUrl ? buktiKeterangan : undefined,
     });
 
     if (!parsed.success) {
@@ -122,9 +189,9 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
       jenis: parsed.data.jenis,
       nominal: parsed.data.nominal,
       kategori: parsed.data.kategori || "",
-      bukti_url: parsed.data.bukti_url || null,
-      bukti_tipe: parsed.data.bukti_url ? (parsed.data.bukti_tipe || "image") : null,
-      bukti_keterangan: parsed.data.bukti_url ? (parsed.data.bukti_keterangan || null) : null,
+      bukti_url: finalBuktiUrl || null,
+      bukti_tipe: finalBuktiUrl ? (parsed.data.bukti_tipe || "image") : null,
+      bukti_keterangan: finalBuktiUrl ? (parsed.data.bukti_keterangan || null) : null,
     };
 
     const { error } = editData
@@ -224,31 +291,63 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
         {/* Bukti Transfer (optional) */}
         <div className="space-y-2 border-t border-border pt-2">
           <p className="text-xs font-medium text-muted-foreground">Bukti Transfer (opsional)</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div className="space-y-1 sm:col-span-2">
-              <input value={buktiUrl} onChange={(e) => setBuktiUrl(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} placeholder="URL Bukti (https://...)" />
-              {errors.bukti_url && <p className="text-xs text-destructive">{errors.bukti_url}</p>}
-            </div>
-            {buktiUrl && (
-              <>
-                <div className="space-y-1">
-                  <select value={buktiTipe} onChange={(e) => setBuktiTipe(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    <option value="image">Gambar</option>
-                    <option value="document">Dokumen</option>
-                  </select>
+          
+          {/* File preview or existing URL */}
+          {(filePreview || selectedFile) && (
+            <div className="relative inline-block">
+              {filePreview && (
+                <img src={filePreview} alt="Preview" className="h-20 w-20 rounded-lg object-cover border border-border" />
+              )}
+              {selectedFile && !filePreview && (
+                <div className="h-20 w-20 rounded-lg border border-border bg-muted flex flex-col items-center justify-center gap-1">
+                  <FileImage className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[72px]">{selectedFile.name}</span>
                 </div>
-              </>
-            )}
+              )}
+              <button type="button" onClick={handleRemoveFile} className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Existing bukti URL (from edit) without new file selected */}
+          {!selectedFile && buktiUrl && !filePreview && (
+            <div className="flex items-center gap-2">
+              <a href={buktiUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 underline truncate max-w-[200px]">Lihat bukti sebelumnya</a>
+              <button type="button" onClick={handleRemoveFile} className="text-destructive hover:text-destructive/80">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Upload button */}
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-2 text-xs border border-dashed border-border rounded-lg hover:bg-muted transition-colors w-full justify-center"
+            >
+              <Upload className="h-4 w-4" />
+              {selectedFile ? "Ganti File" : "Upload Bukti (JPG, PNG, WebP, PDF - maks 5MB)"}
+            </button>
           </div>
-          {buktiUrl && (
+
+          {(selectedFile || buktiUrl) && (
             <input value={buktiKeterangan} onChange={(e) => setBuktiKeterangan(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={300} placeholder="Keterangan bukti" />
           )}
         </div>
 
         <div className="flex gap-2 justify-end">
           <button type="button" onClick={onClose} className="px-4 py-2 text-xs rounded-lg border border-border hover:bg-muted transition-colors">Batal</button>
-          <button type="submit" disabled={loading} className="px-4 py-2 text-xs bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
-            {loading ? "Menyimpan..." : editData ? "Simpan" : "Tambah"}
+          <button type="submit" disabled={loading || uploading} className="px-4 py-2 text-xs bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50">
+            {uploading ? "Mengupload..." : loading ? "Menyimpan..." : editData ? "Simpan" : "Tambah"}
           </button>
         </div>
       </form>

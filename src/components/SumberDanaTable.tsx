@@ -54,7 +54,6 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
     return result;
   }, [data, search, sortDir]);
 
-  const totalSKG = filtered.reduce((s, d) => s + d.skg, 0);
   const totalNominal = filtered.reduce((s, d) => s + d.nominal, 0);
 
   const handleDelete = async (id: string) => {
@@ -69,7 +68,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   };
 
   const openEdit = (d: SumberDana) => {
-    setEditItem({ id: d.id, nama_cabang: d.namaCabang, skg: d.skg });
+    setEditItem({ id: d.id, nama_cabang: d.namaCabang });
     setFormOpen(true);
   };
 
@@ -113,8 +112,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             <tr className="bg-primary text-primary-foreground">
               <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
               <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
-              <th className="py-2.5 px-3 text-center font-medium w-16">SKG</th>
-              <th className="py-2.5 px-3 text-right font-medium">
+                <th className="py-2.5 px-3 text-right font-medium">
                 <button
                   onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
                   className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
@@ -133,7 +131,6 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                 <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
                 <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
-                <td className="py-2.5 px-3 text-center">{d.skg || '-'}</td>
                 <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
                 {user && (
                   <td className="py-2.5 px-3 text-center">
@@ -158,10 +155,9 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-primary/5 font-semibold">
-              <td className="py-2.5 px-3" colSpan={2}>Total</td>
-              <td className="py-2.5 px-3 text-center">{totalSKG}</td>
-              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
+              <tr className="bg-primary/5 font-semibold">
+                <td className="py-2.5 px-3" colSpan={2}>Total</td>
+                <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
               {user && <td />}
             </tr>
           </tfoot>
