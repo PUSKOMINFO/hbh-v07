@@ -69,7 +69,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   };
 
   const openEdit = (d: SumberDana) => {
-    setEditItem({ id: d.id, nama_cabang: d.namaCabang, skg: d.skg, nominal: d.nominal });
+    setEditItem({ id: d.id, nama_cabang: d.namaCabang, skg: d.skg });
     setFormOpen(true);
   };
 
