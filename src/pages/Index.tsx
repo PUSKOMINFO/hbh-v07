@@ -11,6 +11,8 @@ import { useAppSettings } from "@/hooks/useAppSettings";
 import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart } from "lucide-react";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
+import PWAInstallDialog from "@/components/PWAInstallDialog";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -19,6 +21,7 @@ const Index = () => {
   const { data: transaksi = [], isLoading: trLoading } = useTransaksi();
   const { data: settings, isLoading: settingsLoading } = useAppSettings();
   const navigate = useNavigate();
+  const { showInstallDialog, install, dismiss, canInstall } = usePWAInstall();
 
   const targetDonasi = Number(settings?.target_donasi || 101050000);
   const tahunHbh = settings?.tahun_hbh || "2026";
@@ -175,6 +178,14 @@ const Index = () => {
 
       {/* Mobile bottom navigation */}
       <BottomNav active={activeTab} onChange={setActiveTab} />
+
+      {/* PWA Install Dialog */}
+      <PWAInstallDialog
+        open={showInstallDialog}
+        onInstall={install}
+        onDismiss={dismiss}
+        canInstall={canInstall}
+      />
     </div>
   );
 };
