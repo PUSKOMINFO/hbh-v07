@@ -49,7 +49,7 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
                   <div className="rounded-md sm:rounded-lg p-1 sm:p-2.5 bg-white/20 backdrop-blur-sm">
                     <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <p className="text-[9px] sm:text-[14px] font-medium uppercase tracking-wide text-white/70 leading-tight">{formatRupiah(realisasi)}</p>
+                  <p className="sm:text-[14px] font-medium uppercase tracking-wide text-white/70 leading-tight text-base">{formatRupiah(realisasi)}</p>
                   <p className="text-[9px] sm:text-[11px] font-semibold text-white/60">{persen}% - {status}</p>
                 </div>
                 <p className="text-[14px] sm:text-2xl font-bold text-white leading-snug mt-2 sm:mt-3">Realisasi</p>
