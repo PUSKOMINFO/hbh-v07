@@ -31,28 +31,28 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
   return (
     <div className="grid grid-cols-2 gap-1.5 sm:gap-3">
             {/* Target Donasi */}
-            <div className="rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/90 to-primary px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in text-center">
-              <div className="flex flex-col items-center gap-1 sm:gap-3">
+            <div className="rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/90 to-primary px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in">
+              <div className="flex items-center gap-1.5 sm:gap-2.5 mb-1.5 sm:mb-3">
                 <div className="rounded-md sm:rounded-lg p-1 sm:p-2.5 bg-primary-foreground/20 backdrop-blur-sm">
                   <Target className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
                 </div>
-                <p className="sm:text-[14px] font-medium uppercase tracking-wide text-primary-foreground/70 leading-tight text-base">{formatRupiah(targetDonasi)}</p>
+                <p className="text-xs sm:text-2xl font-bold text-primary-foreground leading-snug">Target Donasi</p>
               </div>
-              <p className="sm:text-2xl font-bold text-primary-foreground leading-snug mt-2 sm:mt-3 text-xs">Target Donasi</p>
+              <p className="text-base sm:text-[14px] font-medium uppercase tracking-wide text-primary-foreground/70 leading-tight">{formatRupiah(targetDonasi)}</p>
             </div>
 
             {/* Realisasi */}
-            <div className={`rounded-lg sm:rounded-xl ${realisasiBg} px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in relative overflow-hidden text-center`} style={{ animationDelay: "80ms" }}>
+            <div className={`rounded-lg sm:rounded-xl ${realisasiBg} px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in relative overflow-hidden`} style={{ animationDelay: "80ms" }}>
               <div className="absolute bottom-0 left-0 h-0.5 sm:h-1 bg-white/30 rounded-full transition-all duration-700" style={{ width: `${persen}%` }} />
               <div className="relative z-10">
-                <div className="flex flex-col items-center gap-1 sm:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2.5 mb-1.5 sm:mb-3">
                   <div className="rounded-md sm:rounded-lg p-1 sm:p-2.5 bg-white/20 backdrop-blur-sm">
                     <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <p className="sm:text-[14px] font-medium uppercase tracking-wide text-white/70 leading-tight text-base">{formatRupiah(realisasi)}</p>
-                  <p className="text-[9px] sm:text-[11px] font-semibold text-white/60">{persen}% - {status}</p>
+                  <p className="text-xs sm:text-2xl font-bold text-white leading-snug">Realisasi</p>
                 </div>
-                <p className="text-[14px] sm:text-2xl font-bold text-white leading-snug mt-2 sm:mt-3">Realisasi</p>
+                <p className="text-base sm:text-[14px] font-medium uppercase tracking-wide text-white/70 leading-tight">{formatRupiah(realisasi)}</p>
+                <p className="text-[9px] sm:text-[11px] font-semibold text-white/60 mt-0.5">{persen}% - {status}</p>
               </div>
             </div>
           </div>);
