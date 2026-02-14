@@ -29,7 +29,7 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
   const StatusIcon = persen >= 100 ? Sparkles : persen >= 50 ? CheckCircle2 : AlertTriangle;
 
     return (
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-3">
             {/* Target Donasi */}
             <div className="rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/90 to-primary px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in">
               <div className="flex items-center gap-1 sm:gap-3">
@@ -53,21 +53,6 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
                   <p className="text-[7px] sm:text-[11px] font-semibold text-white/60 shrink-0 ml-auto">{persen}%</p>
                 </div>
                 <p className="text-[11px] sm:text-xl font-bold text-white truncate leading-snug mt-1 sm:mt-2">{formatRupiah(realisasi)}</p>
-              </div>
-            </div>
-
-            {/* Status Donasi */}
-            <div className={`rounded-lg sm:rounded-xl ${statusBg} px-1.5 py-1.5 sm:p-4 shadow-lg animate-fade-in relative overflow-hidden`} style={{ animationDelay: "160ms" }}>
-              <div className="flex items-center gap-1 sm:gap-3">
-                <div className="rounded-md sm:rounded-lg p-1 sm:p-2.5 bg-white/20 backdrop-blur-sm shrink-0">
-                  <StatusIcon className="h-3 w-3 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <p className="text-[7px] sm:text-[11px] font-medium uppercase tracking-wide text-white/70 leading-tight truncate">Status</p>
-                <p className="text-[7px] sm:text-[9px] font-semibold text-white/90 shrink-0 ml-auto">{status}</p>
-              </div>
-              <p className="text-sm sm:text-3xl font-extrabold text-white leading-tight mt-1 sm:mt-1">{persen}%</p>
-              <div className="mt-1 sm:mt-3 h-0.5 sm:h-2.5 rounded-full bg-white/20 overflow-hidden">
-                <div className="h-full rounded-full bg-white/80 transition-all duration-700" style={{ width: `${persen}%` }} />
               </div>
             </div>
           </div>
