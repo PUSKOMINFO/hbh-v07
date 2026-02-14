@@ -38,7 +38,7 @@ const SummaryCards = ({ targetDonasi, realisasi }: SummaryCardsProps) => {
                 </div>
                 <p className="sm:text-[14px] font-medium uppercase tracking-wide text-primary-foreground/70 leading-tight text-base">{formatRupiah(targetDonasi)}</p>
               </div>
-              <p className="text-[14px] sm:text-2xl font-bold text-primary-foreground leading-snug mt-2 sm:mt-3">Target Donasi</p>
+              <p className="sm:text-2xl font-bold text-primary-foreground leading-snug mt-2 sm:mt-3 text-xs">Target Donasi</p>
             </div>
 
             {/* Realisasi */}
