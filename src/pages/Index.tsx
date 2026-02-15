@@ -8,9 +8,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart } from "lucide-react";
+import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer } from "lucide-react";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
+import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
+import { printAllPdf } from "@/lib/exportAllPdf";
 import PWAInstallDialog from "@/components/PWAInstallDialog";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,6 +22,7 @@ const Index = () => {
   const { data: sumberDana = [], isLoading: sdLoading } = useSumberDana();
   const { data: transaksi = [], isLoading: trLoading } = useTransaksi();
   const { data: settings, isLoading: settingsLoading } = useAppSettings();
+  const { data: anggaranSeksi = [] } = useAnggaranSeksi();
   const navigate = useNavigate();
   const { showInstallDialog, install, dismiss, canInstall } = usePWAInstall();
 
@@ -28,6 +31,47 @@ const Index = () => {
 
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
   const [activeTab, setActiveTab] = useState("donasi");
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrintAll = async () => {
+    setIsPrinting(true);
+    try {
+      // Build realisasi map for seksi
+      const realisasiMap: Record<string, number> = {};
+      transaksi.filter((t) => t.jenis === "keluar").forEach((t) => {
+        realisasiMap[t.kategori || "Lainnya"] = (realisasiMap[t.kategori || "Lainnya"] || 0) + t.nominal;
+      });
+
+      const seksiItems = anggaranSeksi.map((s) => ({
+        nama_seksi: s.nama_seksi,
+        anggaran: s.anggaran,
+        realisasi: realisasiMap[s.nama_seksi] || 0,
+      }));
+
+      const totalMasuk = transaksi.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
+      const totalKeluar = transaksi.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
+
+      const seksiData = Object.entries(
+        transaksi.filter((t) => t.jenis === "keluar").reduce<Record<string, number>>((map, t) => {
+          const key = t.kategori || "Lainnya";
+          map[key] = (map[key] || 0) + t.nominal;
+          return map;
+        }, {})
+      ).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+      const sumberDataChart = sumberDana.filter((s) => s.nominal > 0).map((s) => ({ name: s.nama_cabang, value: s.nominal })).sort((a, b) => b.value - a.value);
+
+      await printAllPdf({
+        sumberDana: mappedSumberDana,
+        transaksi: mappedTransaksi,
+        seksiItems,
+        grafik: { totalMasuk, totalKeluar, seksiData, sumberData: sumberDataChart },
+        tahunHbh,
+      });
+    } finally {
+      setIsPrinting(false);
+    }
+  };
 
   // Map DB rows to component-expected shape
   const mappedSumberDana = sumberDana.map((d) => ({
@@ -80,23 +124,35 @@ const Index = () => {
               <p className="text-[11px] sm:text-xs opacity-80">Majelis Dzikir Tasbih Indonesia</p>
             </div>
             {!authLoading && (
-              user ? (
-                <button
-                  onClick={() => signOut()}
-                  className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Keluar</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/auth")}
-                  className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Login</span>
-                </button>
-              )
+              <>
+                {user && (
+                  <button
+                    onClick={handlePrintAll}
+                    disabled={isPrinting || isLoading}
+                    className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors disabled:opacity-50"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{isPrinting ? "Proses..." : "Print All"}</span>
+                  </button>
+                )}
+                {user ? (
+                  <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Keluar</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate("/auth")}
+                    className="flex items-center gap-1.5 text-xs bg-primary-foreground/15 hover:bg-primary-foreground/25 rounded-lg px-3 py-2 transition-colors"
+                  >
+                    <LogIn className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Login</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
