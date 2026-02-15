@@ -74,9 +74,11 @@ function renderSumberDana(doc: jsPDF, data: SumberDana[]) {
     head: [["No", "Sumber Donasi", "Nominal"]],
     body: data.map((d, i) => [i + 1, d.namaCabang, formatRupiah(d.nominal)]),
     foot: [["", "TOTAL", formatRupiah(total)]],
-    styles: { fontSize: 9 },
-    headStyles: { fillColor: [37, 99, 235] },
-    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
+    styles: { fontSize: 9, lineColor: [200, 200, 200], lineWidth: 0.3 },
+    headStyles: { fillColor: [37, 99, 235], lineColor: [30, 80, 200], lineWidth: 0.3 },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold", lineColor: [200, 200, 200], lineWidth: 0.3 },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.3,
     columnStyles: { 0: { cellWidth: 15, halign: "center" }, 2: { halign: "right", cellWidth: 40 } },
   });
 }
@@ -108,8 +110,10 @@ function renderTransaksi(doc: jsPDF, data: Transaksi[]) {
       formatRupiah(t.nominal),
       t.bukti ? "Ada" : "-",
     ]),
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235] },
+    styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.3 },
+    headStyles: { fillColor: [37, 99, 235], lineColor: [30, 80, 200], lineWidth: 0.3 },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.3,
     columnStyles: {
       0: { cellWidth: 10, halign: "center" },
       1: { cellWidth: 25 },
@@ -259,9 +263,11 @@ function renderSeksi(doc: jsPDF, items: SeksiItem[]) {
       return [i + 1, item.nama_seksi, formatRupiah(item.anggaran), formatRupiah(item.realisasi), formatRupiah(s), `${persen}%`];
     }),
     foot: [["", "TOTAL", formatRupiah(totalAnggaran), formatRupiah(totalRealisasi), formatRupiah(sisa), ""]],
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235], halign: "center" },
-    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
+    styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.3 },
+    headStyles: { fillColor: [37, 99, 235], halign: "center", lineColor: [30, 80, 200], lineWidth: 0.3 },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold", lineColor: [200, 200, 200], lineWidth: 0.3 },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.3,
     columnStyles: {
       0: { cellWidth: 10, halign: "center" },
       2: { halign: "right", cellWidth: 32 },
@@ -306,9 +312,11 @@ function renderGrafik(doc: jsPDF, data: GrafikData) {
       totalSeksi > 0 ? `${((item.value / totalSeksi) * 100).toFixed(1)}%` : "0%",
     ]),
     foot: [["", "TOTAL", formatRupiah(totalSeksi), "100%"]],
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235] },
-    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
+    styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.3 },
+    headStyles: { fillColor: [37, 99, 235], lineColor: [30, 80, 200], lineWidth: 0.3 },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold", lineColor: [200, 200, 200], lineWidth: 0.3 },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.3,
     columnStyles: { 0: { cellWidth: 10 }, 2: { halign: "right", cellWidth: 35 }, 3: { halign: "center", cellWidth: 22 } },
   });
 
@@ -328,9 +336,11 @@ function renderGrafik(doc: jsPDF, data: GrafikData) {
       totalSumber > 0 ? `${((item.value / totalSumber) * 100).toFixed(1)}%` : "0%",
     ]),
     foot: [["", "TOTAL", formatRupiah(totalSumber), "100%"]],
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235] },
-    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
+    styles: { fontSize: 8, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.3 },
+    headStyles: { fillColor: [37, 99, 235], lineColor: [30, 80, 200], lineWidth: 0.3 },
+    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold", lineColor: [200, 200, 200], lineWidth: 0.3 },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.3,
     columnStyles: { 0: { cellWidth: 10 }, 2: { halign: "right", cellWidth: 35 }, 3: { halign: "center", cellWidth: 22 } },
   });
 }
