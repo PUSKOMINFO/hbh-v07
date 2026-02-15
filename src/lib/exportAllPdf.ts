@@ -77,7 +77,7 @@ function renderSumberDana(doc: jsPDF, data: SumberDana[]) {
     styles: { fontSize: 9 },
     headStyles: { fillColor: [37, 99, 235] },
     footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 15 }, 2: { halign: "right" } },
+    columnStyles: { 0: { cellWidth: 15, halign: "center" }, 2: { halign: "right", cellWidth: 40 } },
   });
 }
 
@@ -111,9 +111,9 @@ function renderTransaksi(doc: jsPDF, data: Transaksi[]) {
     styles: { fontSize: 8, cellPadding: 2 },
     headStyles: { fillColor: [37, 99, 235] },
     columnStyles: {
-      0: { cellWidth: 10 },
+      0: { cellWidth: 10, halign: "center" },
       1: { cellWidth: 25 },
-      3: { cellWidth: 16 },
+      3: { cellWidth: 16, halign: "center" },
       5: { halign: "right", cellWidth: 30 },
       6: { cellWidth: 14, halign: "center" },
     },
@@ -260,12 +260,12 @@ function renderSeksi(doc: jsPDF, items: SeksiItem[]) {
     }),
     foot: [["", "TOTAL", formatRupiah(totalAnggaran), formatRupiah(totalRealisasi), formatRupiah(sisa), ""]],
     styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [37, 99, 235] },
+    headStyles: { fillColor: [37, 99, 235], halign: "center" },
     footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: "bold" },
     columnStyles: {
-      0: { cellWidth: 10 },
-      2: { halign: "right", cellWidth: 30 },
-      3: { halign: "right", cellWidth: 30 },
+      0: { cellWidth: 10, halign: "center" },
+      2: { halign: "right", cellWidth: 32 },
+      3: { halign: "right", cellWidth: 32 },
       4: { halign: "right", cellWidth: 28 },
       5: { halign: "center", cellWidth: 14 },
     },
