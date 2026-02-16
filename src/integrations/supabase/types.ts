@@ -62,6 +62,56 @@ export type Database = {
         }
         Relationships: []
       }
+      donasi_publik: {
+        Row: {
+          alasan_tolak: string | null
+          bukti_url: string | null
+          created_at: string | null
+          id: string
+          kode_tracking: string
+          nama_donatur: string
+          nominal: number
+          status: string
+          sumber_donasi: string
+          transaksi_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alasan_tolak?: string | null
+          bukti_url?: string | null
+          created_at?: string | null
+          id?: string
+          kode_tracking: string
+          nama_donatur: string
+          nominal?: number
+          status?: string
+          sumber_donasi: string
+          transaksi_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alasan_tolak?: string | null
+          bukti_url?: string | null
+          created_at?: string | null
+          id?: string
+          kode_tracking?: string
+          nama_donatur?: string
+          nominal?: number
+          status?: string
+          sumber_donasi?: string
+          transaksi_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donasi_publik_transaksi_id_fkey"
+            columns: ["transaksi_id"]
+            isOneToOne: false
+            referencedRelation: "transaksi"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sumber_dana: {
         Row: {
           created_at: string | null

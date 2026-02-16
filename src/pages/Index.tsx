@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer } from "lucide-react";
+import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer, Inbox } from "lucide-react";
+import DonasiPublikAdmin from "@/components/DonasiPublikAdmin";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
@@ -105,6 +106,8 @@ const Index = () => {
         return <TransaksiList data={mappedTransaksi} />;
       case "grafik":
         return <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />;
+      case "donasi-masuk":
+        return <DonasiPublikAdmin />;
       default:
         return null;
     }
@@ -171,7 +174,7 @@ const Index = () => {
             {/* Desktop: inline tabs */}
             <div className="hidden sm:block">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full h-auto p-1 bg-muted/60 rounded-xl grid grid-cols-4 gap-1">
+                <TabsList className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? 'grid-cols-5' : 'grid-cols-4'}`}>
                   <TabsTrigger
                     value="donasi"
                     className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
@@ -200,6 +203,15 @@ const Index = () => {
                     <PieChart className="h-4 w-4 shrink-0" />
                     <span>Grafik</span>
                   </TabsTrigger>
+                  {user && (
+                    <TabsTrigger
+                      value="donasi-masuk"
+                      className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                    >
+                      <Inbox className="h-4 w-4 shrink-0" />
+                      <span>Masuk</span>
+                    </TabsTrigger>
+                  )}
                 </TabsList>
 
                 <TabsContent value="donasi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
@@ -214,6 +226,11 @@ const Index = () => {
                 <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
                   <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
                 </TabsContent>
+                {user && (
+                  <TabsContent value="donasi-masuk" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                    <DonasiPublikAdmin />
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
 
@@ -233,7 +250,7 @@ const Index = () => {
       </footer>
 
       {/* Mobile bottom navigation */}
-      <BottomNav active={activeTab} onChange={setActiveTab} />
+      <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />
 
       {/* PWA Install Dialog */}
       <PWAInstallDialog
