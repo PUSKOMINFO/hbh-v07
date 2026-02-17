@@ -32,6 +32,7 @@ const DonasiPublik = () => {
   const [sumberList, setSumberList] = useState<SumberOption[]>([]);
   const [sumberDonasi, setSumberDonasi] = useState("");
   const [namaDonatur, setNamaDonatur] = useState("");
+  const [noWa, setNoWa] = useState("");
   const [nominal, setNominal] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -95,6 +96,7 @@ const DonasiPublik = () => {
         sumber_donasi: sumberDonasi,
         nominal: nominalNum,
         bukti_url: buktiUrl,
+        no_wa: noWa.trim() || null,
       } as any);
 
       if (error) throw error;
@@ -134,6 +136,7 @@ const DonasiPublik = () => {
                   setTrackingCode(null);
                   setNamaDonatur("");
                   setNominal("");
+                  setNoWa("");
                   setSumberDonasi("");
                   setFile(null);
                   setPreview(null);
@@ -187,7 +190,11 @@ const DonasiPublik = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Nominal (Rp)</Label>
+                <Label>No. WhatsApp <span className="text-muted-foreground font-normal">(opsional)</span></Label>
+                <Input value={noWa} onChange={(e) => setNoWa(e.target.value.replace(/[^0-9+\-\s]/g, ""))} placeholder="08xxxxxxxxxx" inputMode="tel" />
+              </div>
+
+              <div className="space-y-2">
                 <Input
                   value={nominal}
                   onChange={(e) => setNominal(formatRibuan(e.target.value))}

@@ -104,6 +104,12 @@ const DonasiPublikAdmin = () => {
                 <span>{selected.nama_donatur}</span>
                 <span className="text-muted-foreground">Sumber</span>
                 <span>{selected.sumber_donasi === "Belum Konfirmasi" ? "Umum" : selected.sumber_donasi}</span>
+                {selected.no_wa && (
+                  <>
+                    <span className="text-muted-foreground">No. WA</span>
+                    <span>{selected.no_wa}</span>
+                  </>
+                )}
                 <span className="text-muted-foreground">Nominal</span>
                 <span className="font-semibold">Rp {fmt(selected.nominal)}</span>
                 <span className="text-muted-foreground">Tanggal</span>

@@ -1,0 +1,1 @@
+ALTER TABLE public.donasi_publik ADD COLUMN no_wa text DEFAULT null;

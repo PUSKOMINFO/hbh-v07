@@ -13,6 +13,7 @@ export interface DonasiPublikRow {
   status: string;
   alasan_tolak: string | null;
   transaksi_id: string | null;
+  no_wa: string | null;
   created_at: string;
   updated_at: string;
 }
