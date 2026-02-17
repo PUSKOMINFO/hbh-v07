@@ -195,6 +195,7 @@ const DonasiPublik = () => {
               </div>
 
               <div className="space-y-2">
+                <Label>Nominal Donasi</Label>
                 <Input
                   value={nominal}
                   onChange={(e) => setNominal(formatRibuan(e.target.value))}
