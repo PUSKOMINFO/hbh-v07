@@ -173,9 +173,9 @@ const DonasiPublik = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Sumber Donasi</Label>
+                <Label>Sumber Donasi Cabang MDTI</Label>
                 <Select value={sumberDonasi} onValueChange={setSumberDonasi}>
-                  <SelectTrigger><SelectValue placeholder="Pilih sumber donasi" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Pilih sumber donasi cabang MDTI" /></SelectTrigger>
                   <SelectContent>
                     {sumberList.map((s) => (
                       <SelectItem key={s.nama_cabang} value={s.nama_cabang}>{s.label}</SelectItem>
