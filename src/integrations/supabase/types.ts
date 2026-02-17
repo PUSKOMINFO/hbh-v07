@@ -70,6 +70,7 @@ export type Database = {
           id: string
           kode_tracking: string
           nama_donatur: string
+          no_wa: string | null
           nominal: number
           status: string
           sumber_donasi: string
@@ -83,6 +84,7 @@ export type Database = {
           id?: string
           kode_tracking: string
           nama_donatur: string
+          no_wa?: string | null
           nominal?: number
           status?: string
           sumber_donasi: string
@@ -96,6 +98,7 @@ export type Database = {
           id?: string
           kode_tracking?: string
           nama_donatur?: string
+          no_wa?: string | null
           nominal?: number
           status?: string
           sumber_donasi?: string
