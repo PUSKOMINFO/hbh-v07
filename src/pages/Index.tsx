@@ -34,6 +34,26 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("donasi");
   const [isPrinting, setIsPrinting] = useState(false);
 
+  // Map DB rows to component-expected shape (moved before handlePrintAll)
+  const mappedSumberDana = sumberDana.map((d) => ({
+    id: d.id,
+    namaCabang: d.nama_cabang,
+    skg: d.skg,
+    nominal: d.nominal,
+  }));
+
+  const mappedTransaksi = transaksi.map((t) => ({
+    id: t.id,
+    tanggal: t.tanggal,
+    keterangan: t.keterangan,
+    jenis: t.jenis,
+    nominal: t.nominal,
+    kategori: t.kategori,
+    bukti: t.bukti_url
+      ? { url: t.bukti_url, tipe: t.bukti_tipe || "image", keterangan: t.bukti_keterangan || undefined }
+      : undefined,
+  }));
+
   const handlePrintAll = async () => {
     setIsPrinting(true);
     try {
@@ -73,26 +93,6 @@ const Index = () => {
       setIsPrinting(false);
     }
   };
-
-  // Map DB rows to component-expected shape
-  const mappedSumberDana = sumberDana.map((d) => ({
-    id: d.id,
-    namaCabang: d.nama_cabang,
-    skg: d.skg,
-    nominal: d.nominal,
-  }));
-
-  const mappedTransaksi = transaksi.map((t) => ({
-    id: t.id,
-    tanggal: t.tanggal,
-    keterangan: t.keterangan,
-    jenis: t.jenis,
-    nominal: t.nominal,
-    kategori: t.kategori,
-    bukti: t.bukti_url
-      ? { url: t.bukti_url, tipe: t.bukti_tipe || "image", keterangan: t.bukti_keterangan || undefined }
-      : undefined,
-  }));
 
   const isLoading = sdLoading || trLoading || settingsLoading;
 
