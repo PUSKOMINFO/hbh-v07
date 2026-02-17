@@ -185,7 +185,7 @@ const DonasiPublik = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Nama Donatur</Label>
+                <Label>Nama Donatur ( wajib diisi )</Label>
                 <Input value={namaDonatur} onChange={(e) => setNamaDonatur(e.target.value)} placeholder="Masukkan nama Anda" />
               </div>
 
@@ -195,7 +195,7 @@ const DonasiPublik = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Nominal Donasi</Label>
+                <Label>Nominal Donasi ( wajib diisi )</Label>
                 <Input
                   value={nominal}
                   onChange={(e) => setNominal(formatRibuan(e.target.value))}
@@ -205,7 +205,7 @@ const DonasiPublik = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Bukti Bayar (opsional)</Label>
+                <Label>Bukti Bayar (Pastikan bukti bayar sesuai isian di nominal)</Label>
                 <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                   {preview ? (
                     <div className="space-y-2">
