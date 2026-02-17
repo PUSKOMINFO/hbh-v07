@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { createClient } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
 import { X, Upload, FileImage, Trash2 } from "lucide-react";
 import { z } from "zod";
-
-const storageClient = createClient(
-  import.meta.env.VITE_SUPABASE_STORAGE_URL,
-  import.meta.env.VITE_SUPABASE_STORAGE_KEY
-);
 
 const schema = z.object({
   tanggal: z.string().min(1, "Tanggal wajib diisi"),
@@ -134,7 +128,7 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
   const uploadFile = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
-    const { error } = await storageClient.storage.from("bukti").upload(fileName, file, {
+    const { error } = await supabase.storage.from("bukti").upload(fileName, file, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -142,7 +136,7 @@ const TransaksiForm = ({ isOpen, onClose, editData }: TransaksiFormProps) => {
       toast({ title: "Upload gagal", description: error.message, variant: "destructive" });
       return null;
     }
-    const { data: urlData } = storageClient.storage.from("bukti").getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage.from("bukti").getPublicUrl(fileName);
     return urlData.publicUrl;
   };
 
