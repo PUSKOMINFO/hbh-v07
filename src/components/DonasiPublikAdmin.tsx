@@ -62,7 +62,7 @@ const DonasiPublikAdmin = () => {
               <TableHead className="text-xs">Nama</TableHead>
               <TableHead className="text-xs">Nominal</TableHead>
               <TableHead className="text-xs">Status</TableHead>
-              <TableHead className="text-xs w-10"></TableHead>
+              <TableHead className="text-xs w-14 text-center">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -84,8 +84,10 @@ const DonasiPublikAdmin = () => {
                         {statusConfig[d.status]?.label || d.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {expandedId === d.id ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <TableCell className="text-center">
+                      <div className={`inline-flex items-center justify-center h-7 w-7 rounded-md transition-colors ${expandedId === d.id ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+                        {expandedId === d.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
                     </TableCell>
                   </TableRow>
 
