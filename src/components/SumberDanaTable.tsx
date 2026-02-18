@@ -76,14 +76,9 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
                     </>
                   )}
                   {user && (
-                  <>
-                    <button disabled className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-accent text-accent-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 opacity-50 cursor-not-allowed">
-                        <DatabaseBackup className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Seed Data</span><span className="sm:hidden">Seed</span>
-                      </button>
                     <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
                       <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
                     </button>
-                  </>
                 )}
               </div>
           </div>
