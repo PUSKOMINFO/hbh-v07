@@ -9,7 +9,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer, Inbox, FileText, Wallet } from "lucide-react";
+import {
+  BookOpen,
+  LogIn,
+  LogOut,
+  List,
+  ClipboardList,
+  ArrowLeftRight,
+  PieChart,
+  Printer,
+  Inbox,
+  FileText,
+  Wallet,
+} from "lucide-react";
 import DonasiPublikAdmin from "@/components/DonasiPublikAdmin";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +40,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { showInstallDialog, install, dismiss, canInstall } = usePWAInstall();
 
-  const targetDonasi = Number(settings?.target_donasi || 101050000);
+  const targetDonasi = Number(settings?.target_donasi || 101200000);
   const tahunHbh = settings?.tahun_hbh || "2026";
 
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
@@ -61,9 +73,11 @@ const Index = () => {
     try {
       // Build realisasi map for seksi
       const realisasiMap: Record<string, number> = {};
-      transaksi.filter((t) => t.jenis === "keluar").forEach((t) => {
-        realisasiMap[t.kategori || "Lainnya"] = (realisasiMap[t.kategori || "Lainnya"] || 0) + t.nominal;
-      });
+      transaksi
+        .filter((t) => t.jenis === "keluar")
+        .forEach((t) => {
+          realisasiMap[t.kategori || "Lainnya"] = (realisasiMap[t.kategori || "Lainnya"] || 0) + t.nominal;
+        });
 
       const seksiItems = anggaranSeksi.map((s) => ({
         nama_seksi: s.nama_seksi,
@@ -75,14 +89,21 @@ const Index = () => {
       const totalKeluar = transaksi.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
 
       const seksiData = Object.entries(
-        transaksi.filter((t) => t.jenis === "keluar").reduce<Record<string, number>>((map, t) => {
-          const key = t.kategori || "Lainnya";
-          map[key] = (map[key] || 0) + t.nominal;
-          return map;
-        }, {})
-      ).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+        transaksi
+          .filter((t) => t.jenis === "keluar")
+          .reduce<Record<string, number>>((map, t) => {
+            const key = t.kategori || "Lainnya";
+            map[key] = (map[key] || 0) + t.nominal;
+            return map;
+          }, {}),
+      )
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
 
-      const sumberDataChart = sumberDana.filter((s) => s.nominal > 0).map((s) => ({ name: s.nama_cabang, value: s.nominal })).sort((a, b) => b.value - a.value);
+      const sumberDataChart = sumberDana
+        .filter((s) => s.nominal > 0)
+        .map((s) => ({ name: s.nama_cabang, value: s.nominal }))
+        .sort((a, b) => b.value - a.value);
 
       await printAllPdf({
         sumberDana: mappedSumberDana,
@@ -188,7 +209,10 @@ const Index = () => {
             <SuratEdaran />
           </TabsContent>
 
-          <TabsContent value="laporan" className="mt-3 focus-visible:outline-none focus-visible:ring-0 space-y-3 sm:space-y-4">
+          <TabsContent
+            value="laporan"
+            className="mt-3 focus-visible:outline-none focus-visible:ring-0 space-y-3 sm:space-y-4"
+          >
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -200,7 +224,9 @@ const Index = () => {
                 {/* Desktop: inline tabs */}
                 <div className="hidden sm:block">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? 'grid-cols-5' : 'grid-cols-4'}`}>
+                    <TabsList
+                      className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? "grid-cols-5" : "grid-cols-4"}`}
+                    >
                       <TabsTrigger
                         value="donasi"
                         className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
@@ -253,7 +279,10 @@ const Index = () => {
                       <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
                     </TabsContent>
                     {user && (
-                      <TabsContent value="donasi-masuk" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                      <TabsContent
+                        value="donasi-masuk"
+                        className="mt-3 focus-visible:outline-none focus-visible:ring-0"
+                      >
                         <DonasiPublikAdmin />
                       </TabsContent>
                     )}
@@ -261,9 +290,7 @@ const Index = () => {
                 </div>
 
                 {/* Mobile: content only (tabs via BottomNav) */}
-                <div className="sm:hidden">
-                  {renderTabContent()}
-                </div>
+                <div className="sm:hidden">{renderTabContent()}</div>
               </>
             )}
           </TabsContent>
@@ -278,17 +305,10 @@ const Index = () => {
       </footer>
 
       {/* Mobile bottom navigation - only show when on Laporan tab */}
-      {mainTab === "laporan" && (
-        <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />
-      )}
+      {mainTab === "laporan" && <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />}
 
       {/* PWA Install Dialog */}
-      <PWAInstallDialog
-        open={showInstallDialog}
-        onInstall={install}
-        onDismiss={dismiss}
-        canInstall={canInstall}
-      />
+      <PWAInstallDialog open={showInstallDialog} onInstall={install} onDismiss={dismiss} canInstall={canInstall} />
     </div>
   );
 };
