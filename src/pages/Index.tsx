@@ -4,11 +4,12 @@ import SumberDanaTable from "@/components/SumberDanaTable";
 import TransaksiList from "@/components/TransaksiList";
 import AnggaranSeksiCard from "@/components/AnggaranSeksiCard";
 import BottomNav from "@/components/BottomNav";
+import SuratEdaran from "@/components/SuratEdaran";
 import { useAuth } from "@/hooks/useAuth";
 import { useSumberDana } from "@/hooks/useSumberDana";
 import { useTransaksi } from "@/hooks/useTransaksi";
 import { useAppSettings } from "@/hooks/useAppSettings";
-import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer, Inbox } from "lucide-react";
+import { BookOpen, LogIn, LogOut, List, ClipboardList, ArrowLeftRight, PieChart, Printer, Inbox, FileText, Wallet } from "lucide-react";
 import DonasiPublikAdmin from "@/components/DonasiPublikAdmin";
 import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,7 @@ const Index = () => {
   const tahunHbh = settings?.tahun_hbh || "2026";
 
   const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
+  const [mainTab, setMainTab] = useState("surat-edaran");
   const [activeTab, setActiveTab] = useState("donasi");
   const [isPrinting, setIsPrinting] = useState(false);
 
@@ -163,83 +165,109 @@ const Index = () => {
 
       {/* Content */}
       <main className="container max-w-3xl py-3 sm:py-4 space-y-3 sm:space-y-4 pb-20 sm:pb-6">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
-        ) : (
-          <>
-            <SummaryCards targetDonasi={targetDonasi} realisasi={realisasi} />
+        {/* Main 2-tab layout */}
+        <Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
+          <TabsList className="w-full h-auto p-1 bg-muted/60 rounded-xl grid grid-cols-2 gap-1">
+            <TabsTrigger
+              value="surat-edaran"
+              className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <FileText className="h-4 w-4 shrink-0" />
+              <span>Surat Edaran</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="laporan"
+              className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+            >
+              <Wallet className="h-4 w-4 shrink-0" />
+              <span>Laporan Keuangan</span>
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Desktop: inline tabs */}
-            <div className="hidden sm:block">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? 'grid-cols-5' : 'grid-cols-4'}`}>
-                  <TabsTrigger
-                    value="donasi"
-                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                  >
-                    <List className="h-4 w-4 shrink-0" />
-                    <span>Donasi</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="seksi"
-                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                  >
-                    <ClipboardList className="h-4 w-4 shrink-0" />
-                    <span>Seksi</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="transaksi"
-                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                  >
-                    <ArrowLeftRight className="h-4 w-4 shrink-0" />
-                    <span>Transaksi</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="grafik"
-                    className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                  >
-                    <PieChart className="h-4 w-4 shrink-0" />
-                    <span>Grafik</span>
-                  </TabsTrigger>
-                  {user && (
-                    <TabsTrigger
-                      value="donasi-masuk"
-                      className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                    >
-                      <Inbox className="h-4 w-4 shrink-0" />
-                      <span>Masuk</span>
-                    </TabsTrigger>
-                  )}
-                </TabsList>
+          <TabsContent value="surat-edaran" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+            <SuratEdaran />
+          </TabsContent>
 
-                <TabsContent value="donasi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                  <SumberDanaTable data={mappedSumberDana} />
-                </TabsContent>
-                <TabsContent value="seksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                  <AnggaranSeksiCard transaksi={transaksi} />
-                </TabsContent>
-                <TabsContent value="transaksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                  <TransaksiList data={mappedTransaksi} />
-                </TabsContent>
-                <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                  <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
-                </TabsContent>
-                {user && (
-                  <TabsContent value="donasi-masuk" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                    <DonasiPublikAdmin />
-                  </TabsContent>
-                )}
-              </Tabs>
-            </div>
+          <TabsContent value="laporan" className="mt-3 focus-visible:outline-none focus-visible:ring-0 space-y-3 sm:space-y-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : (
+              <>
+                <SummaryCards targetDonasi={targetDonasi} realisasi={realisasi} />
 
-            {/* Mobile: content only (tabs via BottomNav) */}
-            <div className="sm:hidden">
-              {renderTabContent()}
-            </div>
-          </>
-        )}
+                {/* Desktop: inline tabs */}
+                <div className="hidden sm:block">
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? 'grid-cols-5' : 'grid-cols-4'}`}>
+                      <TabsTrigger
+                        value="donasi"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                      >
+                        <List className="h-4 w-4 shrink-0" />
+                        <span>Donasi</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="seksi"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                      >
+                        <ClipboardList className="h-4 w-4 shrink-0" />
+                        <span>Seksi</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="transaksi"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                      >
+                        <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                        <span>Transaksi</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="grafik"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                      >
+                        <PieChart className="h-4 w-4 shrink-0" />
+                        <span>Grafik</span>
+                      </TabsTrigger>
+                      {user && (
+                        <TabsTrigger
+                          value="donasi-masuk"
+                          className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                        >
+                          <Inbox className="h-4 w-4 shrink-0" />
+                          <span>Masuk</span>
+                        </TabsTrigger>
+                      )}
+                    </TabsList>
+
+                    <TabsContent value="donasi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                      <SumberDanaTable data={mappedSumberDana} />
+                    </TabsContent>
+                    <TabsContent value="seksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                      <AnggaranSeksiCard transaksi={transaksi} />
+                    </TabsContent>
+                    <TabsContent value="transaksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                      <TransaksiList data={mappedTransaksi} />
+                    </TabsContent>
+                    <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                      <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
+                    </TabsContent>
+                    {user && (
+                      <TabsContent value="donasi-masuk" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                        <DonasiPublikAdmin />
+                      </TabsContent>
+                    )}
+                  </Tabs>
+                </div>
+
+                {/* Mobile: content only (tabs via BottomNav) */}
+                <div className="sm:hidden">
+                  {renderTabContent()}
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Footer - hidden on mobile to avoid overlap with bottom nav */}
@@ -249,8 +277,10 @@ const Index = () => {
         </p>
       </footer>
 
-      {/* Mobile bottom navigation */}
-      <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />
+      {/* Mobile bottom navigation - only show when on Laporan tab */}
+      {mainTab === "laporan" && (
+        <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />
+      )}
 
       {/* PWA Install Dialog */}
       <PWAInstallDialog
