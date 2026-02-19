@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, Phone, Copy, Check, ExternalLink, Download } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, Clock, MapPin, Phone, Copy, Check, ExternalLink, Download, HandCoins } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +9,7 @@ const TARGET_DATE = new Date("2026-03-28T16:00:00+07:00");
 
 const SuratEdaran = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [copied, setCopied] = useState(false);
 
@@ -145,6 +147,14 @@ const SuratEdaran = () => {
           >
             {copied ? <Check className="h-3.5 w-3.5 mr-1.5" /> : <Copy className="h-3.5 w-3.5 mr-1.5" />}
             {copied ? "Tersalin!" : "Salin Nomor Rekening"}
+          </Button>
+          <Button
+            size="lg"
+            className="w-full gap-2 text-sm font-semibold"
+            onClick={() => navigate("/donasi")}
+          >
+            <HandCoins className="h-4 w-4" />
+            Bayar Donasi
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Konfirmasi transfer via WhatsApp ke bendahara di bawah ini.
