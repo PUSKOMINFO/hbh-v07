@@ -155,7 +155,7 @@ const SuratEdaran = () => {
           >
             <HandCoins className="h-4 w-4" />
             Bayar Donasi
-            <span className="ml-auto">→</span>
+            <span className="ml-auto">Klik Bayar Donasi →</span>
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Konfirmasi transfer via WhatsApp ke bendahara di bawah ini.
