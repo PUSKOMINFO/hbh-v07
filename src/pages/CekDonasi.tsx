@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { BookOpen, Search, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface DonasiResult {
   kode_tracking: string;
@@ -25,6 +25,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 };
 
 const CekDonasi = () => {
+  const navigate = useNavigate();
   const [kode, setKode] = useState("");
   const [result, setResult] = useState<DonasiResult | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -59,9 +60,9 @@ const CekDonasi = () => {
       <header className="bg-primary text-primary-foreground">
         <div className="container max-w-lg py-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary-foreground/15 p-2">
-              <BookOpen className="h-5 w-5" />
-            </div>
+            <button onClick={() => navigate("/")} className="rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 p-2 transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
             <div>
               <h1 className="text-base font-bold">Cek Status Donasi</h1>
               <p className="text-[11px] opacity-80">Majelis Dzikir Tasbih Indonesia</p>
