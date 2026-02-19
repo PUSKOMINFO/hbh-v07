@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Upload, CheckCircle2, Copy } from "lucide-react";
+import { BookOpen, Upload, CheckCircle2, Copy, Check } from "lucide-react";
 import { compressImage } from "@/lib/imageCompress";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -29,6 +29,7 @@ interface SumberOption {
 
 const DonasiPublik = () => {
   const { toast } = useToast();
+  const [copiedRek, setCopiedRek] = useState(false);
   const [sumberList, setSumberList] = useState<SumberOption[]>([]);
   const [sumberDonasi, setSumberDonasi] = useState("");
   const [namaDonatur, setNamaDonatur] = useState("");
@@ -165,7 +166,34 @@ const DonasiPublik = () => {
         </div>
       </header>
 
-      <main className="container max-w-lg py-6 px-4">
+      <main className="container max-w-lg py-6 px-4 space-y-4">
+        {/* Info Rekening */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="py-4 px-4 space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transfer ke Rekening</p>
+            <div className="bg-background rounded-lg p-3 text-center space-y-1">
+              <p className="text-xs text-muted-foreground">Bank BRI</p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-lg font-mono font-bold tracking-wider">5895-01-02-9201-53-8</p>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => {
+                    navigator.clipboard.writeText("5895-01-02-9201-53-8");
+                    setCopiedRek(true);
+                    toast({ title: "Nomor rekening disalin!" });
+                    setTimeout(() => setCopiedRek(false), 2000);
+                  }}
+                >
+                  {copiedRek ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">a/n <span className="font-semibold text-foreground">Muqorrobin</span></p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Kirim Donasi</CardTitle>
