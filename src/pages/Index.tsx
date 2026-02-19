@@ -27,8 +27,6 @@ import DonutCharts from "@/components/DonutCharts";
 import { useNavigate } from "react-router-dom";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
 import { printAllPdf } from "@/lib/exportAllPdf";
-import PWAInstallDialog from "@/components/PWAInstallDialog";
-import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -38,7 +36,7 @@ const Index = () => {
   const { data: settings, isLoading: settingsLoading } = useAppSettings();
   const { data: anggaranSeksi = [] } = useAnggaranSeksi();
   const navigate = useNavigate();
-  const { showInstallDialog, install, dismiss, canInstall } = usePWAInstall();
+  
 
   const targetDonasi = Number(settings?.target_donasi || 101200000);
   const tahunHbh = settings?.tahun_hbh || "2026";
@@ -307,8 +305,6 @@ const Index = () => {
       {/* Mobile bottom navigation - only show when on Laporan tab */}
       {mainTab === "laporan" && <BottomNav active={activeTab} onChange={setActiveTab} isAdmin={!!user} />}
 
-      {/* PWA Install Dialog */}
-      <PWAInstallDialog open={showInstallDialog} onInstall={install} onDismiss={dismiss} canInstall={canInstall} />
     </div>
   );
 };
