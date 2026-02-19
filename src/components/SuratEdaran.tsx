@@ -150,11 +150,12 @@ const SuratEdaran = () => {
           </Button>
           <Button
             size="lg"
-            className="w-full gap-2 text-sm font-semibold"
+            className="w-full gap-2 text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white"
             onClick={() => navigate("/donasi")}
           >
             <HandCoins className="h-4 w-4" />
             Bayar Donasi
+            <span className="ml-auto">→</span>
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Konfirmasi transfer via WhatsApp ke bendahara di bawah ini.
