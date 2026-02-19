@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Upload, CheckCircle2, Copy, Check } from "lucide-react";
+import { BookOpen, Upload, CheckCircle2, Copy, Check, ArrowLeft } from "lucide-react";
 import { compressImage } from "@/lib/imageCompress";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function generateTrackingCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -30,6 +30,7 @@ interface SumberOption {
 const DonasiPublik = () => {
   const { toast } = useToast();
   const [copiedRek, setCopiedRek] = useState(false);
+  const navigate = useNavigate();
   const [sumberList, setSumberList] = useState<SumberOption[]>([]);
   const [sumberDonasi, setSumberDonasi] = useState("");
   const [namaDonatur, setNamaDonatur] = useState("");
@@ -153,11 +154,11 @@ const DonasiPublik = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground">
-        <div className="container max-w-lg py-4">
+           <div className="container max-w-lg py-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary-foreground/15 p-2">
-              <BookOpen className="h-5 w-5" />
-            </div>
+            <button onClick={() => navigate("/")} className="rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 p-2 transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
             <div>
               <h1 className="text-base font-bold">Form Donasi HBH</h1>
               <p className="text-[11px] opacity-80">Majelis Dzikir Tasbih Indonesia</p>
