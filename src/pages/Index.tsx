@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { useAnggaranSeksi } from "@/hooks/useAnggaranSeksi";
 import { printAllPdf } from "@/lib/exportAllPdf";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { EXCLUDED_SUMBER } from "@/lib/constants";
 
 const Index = () => {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -41,13 +42,16 @@ const Index = () => {
   const targetDonasi = Number(settings?.target_donasi || 101200000);
   const tahunHbh = settings?.tahun_hbh || "2026";
 
-  const realisasi = sumberDana.reduce((s, d) => s + d.nominal, 0);
+  // Exclude DANA PENGURUS PUSAT from public calculations
+  const publicSumberDana = sumberDana.filter((d) => d.nama_cabang !== EXCLUDED_SUMBER);
+  const publicTransaksi = transaksi.filter((t) => t.kategori !== EXCLUDED_SUMBER);
+  const realisasi = publicSumberDana.reduce((s, d) => s + d.nominal, 0);
   const [mainTab, setMainTab] = useState("surat-edaran");
   const [activeTab, setActiveTab] = useState("donasi");
   const [isPrinting, setIsPrinting] = useState(false);
 
   // Map DB rows to component-expected shape (moved before handlePrintAll)
-  const mappedSumberDana = sumberDana.map((d) => ({
+  const mappedSumberDana = publicSumberDana.map((d) => ({
     id: d.id,
     namaCabang: d.nama_cabang,
     skg: d.skg,
@@ -71,7 +75,7 @@ const Index = () => {
     try {
       // Build realisasi map for seksi
       const realisasiMap: Record<string, number> = {};
-      transaksi
+      publicTransaksi
         .filter((t) => t.jenis === "keluar")
         .forEach((t) => {
           realisasiMap[t.kategori || "Lainnya"] = (realisasiMap[t.kategori || "Lainnya"] || 0) + t.nominal;
@@ -83,11 +87,11 @@ const Index = () => {
         realisasi: realisasiMap[s.nama_seksi] || 0,
       }));
 
-      const totalMasuk = transaksi.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
-      const totalKeluar = transaksi.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
+      const totalMasuk = publicTransaksi.filter((t) => t.jenis === "masuk").reduce((s, t) => s + t.nominal, 0);
+      const totalKeluar = publicTransaksi.filter((t) => t.jenis === "keluar").reduce((s, t) => s + t.nominal, 0);
 
       const seksiData = Object.entries(
-        transaksi
+        publicTransaksi
           .filter((t) => t.jenis === "keluar")
           .reduce<Record<string, number>>((map, t) => {
             const key = t.kategori || "Lainnya";
@@ -98,7 +102,7 @@ const Index = () => {
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
 
-      const sumberDataChart = sumberDana
+      const sumberDataChart = publicSumberDana
         .filter((s) => s.nominal > 0)
         .map((s) => ({ name: s.nama_cabang, value: s.nominal }))
         .sort((a, b) => b.value - a.value);
@@ -126,7 +130,7 @@ const Index = () => {
       case "transaksi":
         return <TransaksiList data={mappedTransaksi} />;
       case "grafik":
-        return <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />;
+        return <DonutCharts transaksi={publicTransaksi} sumberDana={publicSumberDana} />;
       case "donasi-masuk":
         return <DonasiPublikAdmin />;
       default:
@@ -274,7 +278,7 @@ const Index = () => {
                       <TransaksiList data={mappedTransaksi} />
                     </TabsContent>
                     <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                      <DonutCharts transaksi={transaksi} sumberDana={sumberDana} />
+                      <DonutCharts transaksi={publicTransaksi} sumberDana={publicSumberDana} />
                     </TabsContent>
                     {user && (
                       <TabsContent
