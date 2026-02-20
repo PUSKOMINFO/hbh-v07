@@ -49,7 +49,7 @@ const DonasiPublik = () => {
       .then(({ data }) => {
         if (!data) return;
         const filtered = data
-          .filter((d) => !d.nama_cabang.toLowerCase().includes("kanjeng guru"))
+          .filter((d) => !d.nama_cabang.toLowerCase().includes("kanjeng guru") && d.nama_cabang !== "DANA PENGURUS PUSAT")
           .map((d) => ({
             nama_cabang: d.nama_cabang,
             label: d.nama_cabang === "Belum Konfirmasi" ? "Umum" : d.nama_cabang,
