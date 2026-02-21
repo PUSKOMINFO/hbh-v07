@@ -9,12 +9,13 @@ interface BottomNavProps {
 const baseTabs = [
   { id: "donasi", label: "Donasi", icon: List },
   { id: "seksi", label: "Seksi", icon: ClipboardList },
-  { id: "transaksi", label: "Transaksi", icon: ArrowLeftRight },
   { id: "grafik", label: "Grafik", icon: PieChart },
 ];
 
 const BottomNav = ({ active, onChange, isAdmin }: BottomNavProps) => {
-  const tabs = isAdmin ? [...baseTabs, { id: "donasi-masuk", label: "Masuk", icon: Inbox }] : baseTabs;
+  const tabs = isAdmin
+    ? [...baseTabs.slice(0, 2), { id: "transaksi", label: "Transaksi", icon: ArrowLeftRight }, ...baseTabs.slice(2), { id: "donasi-masuk", label: "Masuk", icon: Inbox }]
+    : baseTabs;
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-border/50 bg-background/80 backdrop-blur-xl">
       {/* Safe area + nav content */}
