@@ -128,7 +128,7 @@ const Index = () => {
       case "seksi":
         return <AnggaranSeksiCard transaksi={transaksi} />;
       case "transaksi":
-        return <TransaksiList data={mappedTransaksi} />;
+        return user ? <TransaksiList data={mappedTransaksi} /> : null;
       case "grafik":
         return <DonutCharts transaksi={publicTransaksi} sumberDana={publicSumberDana} />;
       case "donasi-masuk":
@@ -227,7 +227,7 @@ const Index = () => {
                 <div className="hidden sm:block">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList
-                      className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? "grid-cols-5" : "grid-cols-4"}`}
+                      className={`w-full h-auto p-1 bg-muted/60 rounded-xl grid gap-1 ${user ? "grid-cols-5" : "grid-cols-3"}`}
                     >
                       <TabsTrigger
                         value="donasi"
@@ -243,13 +243,15 @@ const Index = () => {
                         <ClipboardList className="h-4 w-4 shrink-0" />
                         <span>Seksi</span>
                       </TabsTrigger>
-                      <TabsTrigger
-                        value="transaksi"
-                        className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
-                      >
-                        <ArrowLeftRight className="h-4 w-4 shrink-0" />
-                        <span>Transaksi</span>
-                      </TabsTrigger>
+                      {user && (
+                        <TabsTrigger
+                          value="transaksi"
+                          className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                        >
+                          <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                          <span>Transaksi</span>
+                        </TabsTrigger>
+                      )}
                       <TabsTrigger
                         value="grafik"
                         className="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
@@ -274,9 +276,11 @@ const Index = () => {
                     <TabsContent value="seksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
                       <AnggaranSeksiCard transaksi={transaksi} />
                     </TabsContent>
-                    <TabsContent value="transaksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
-                      <TransaksiList data={mappedTransaksi} />
-                    </TabsContent>
+                    {user && (
+                      <TabsContent value="transaksi" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
+                        <TransaksiList data={mappedTransaksi} />
+                      </TabsContent>
+                    )}
                     <TabsContent value="grafik" className="mt-3 focus-visible:outline-none focus-visible:ring-0">
                       <DonutCharts transaksi={publicTransaksi} sumberDana={publicSumberDana} />
                     </TabsContent>
