@@ -99,7 +99,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="bg-primary text-primary-foreground">
               <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
               <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
@@ -117,39 +117,45 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               {user && <th className="py-2.5 px-3 text-center font-medium w-20">Aksi</th>}
             </tr>
           </thead>
-          <tbody>
-            {filtered.map((d, i) => (
-              <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-                <td className="py-2.5 px-3 text-muted-foreground">{i + 1}</td>
-                <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
-                <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
-                {user && (
-                  <td className="py-2.5 px-3 text-center">
-                    {deleteId === d.id ? (
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => handleDelete(d.id)} className="px-2 py-1 text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
-                        <button onClick={() => setDeleteId(null)} className="px-2 py-1 text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
-                          <Pencil className="h-3.5 w-3.5 text-primary" />
-                        </button>
-                        <button onClick={() => setDeleteId(d.id)} className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
+        </table>
+        <div className="max-h-[45vh] overflow-y-auto">
+          <table className="w-full text-sm">
+            <tbody>
+              {filtered.map((d, i) => (
+                <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                  <td className="py-2.5 px-3 text-muted-foreground w-10">{i + 1}</td>
+                  <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
+                  <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(d.nominal)}</td>
+                  {user && (
+                    <td className="py-2.5 px-3 text-center w-20">
+                      {deleteId === d.id ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => handleDelete(d.id)} className="px-2 py-1 text-[11px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+                          <button onClick={() => setDeleteId(null)} className="px-2 py-1 text-[11px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
+                            <Pencil className="h-3.5 w-3.5 text-primary" />
+                          </button>
+                          <button onClick={() => setDeleteId(d.id)} className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <table className="w-full text-sm">
           <tfoot>
-              <tr className="bg-primary/5 font-semibold">
-                <td className="py-2.5 px-3" colSpan={2}>Total</td>
-                <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
-              {user && <td />}
+            <tr className="bg-primary/5 font-semibold border-t border-border">
+              <td className="py-2.5 px-3 w-10" colSpan={2}>Total</td>
+              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatRupiah(totalNominal)}</td>
+              {user && <td className="w-20" />}
             </tr>
           </tfoot>
         </table>
