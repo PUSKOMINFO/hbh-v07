@@ -58,6 +58,9 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
     });
 
   const totalAnggaran = anggaranSeksi.reduce((s, a) => s + a.anggaran, 0);
+  const totalDanaMasuk = transaksi
+    .filter((t) => t.jenis === "masuk")
+    .reduce((s, t) => s + t.nominal, 0);
   const totalRealisasi = transaksi
     .filter((t) => t.jenis === "keluar")
     .reduce((s, t) => s + t.nominal, 0);
