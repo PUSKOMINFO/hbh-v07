@@ -159,9 +159,9 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
           </div>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
-          <span>Total Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
+          <span>Total Kebutuhan Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
           <span className="hidden sm:inline">·</span>
-          <span>Realisasi: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
+          <span>Realisasi Serapan: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
         </div>
 
         {/* Sync target donasi indicator */}
