@@ -236,20 +236,26 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
 
       {/* Data Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
-              <th className="text-left px-3 py-2 font-medium">No</th>
-              <th className="text-left px-3 py-2 font-medium">Nama Seksi</th>
-              <th className="text-right px-3 py-2 font-medium">Anggaran</th>
-              <th className="text-right px-3 py-2 font-medium">Realisasi</th>
-              <th className="text-center px-3 py-2 font-medium">%</th>
-              {user && <th className="text-center px-3 py-2 font-medium w-10"></th>}
-            </tr>
-          </thead>
-        </table>
-        <div className="max-h-[50vh] overflow-y-auto">
-          <table className="w-full text-sm">
+        <div className="max-h-[55vh] overflow-y-auto">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col className="w-[36px]" />
+              <col />
+              <col className="w-[22%]" />
+              <col className="w-[22%]" />
+              <col className="w-[48px]" />
+              {user && <col className="w-[40px]" />}
+            </colgroup>
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
+                <th className="text-left px-3 py-2 font-medium">No</th>
+                <th className="text-left px-3 py-2 font-medium">Nama Seksi</th>
+                <th className="text-right px-3 py-2 font-medium">Anggaran</th>
+                <th className="text-right px-3 py-2 font-medium">Realisasi</th>
+                <th className="text-center px-3 py-2 font-medium">%</th>
+                {user && <th className="px-2 py-2 font-medium"></th>}
+              </tr>
+            </thead>
             <tbody>
               {filteredSeksi.length === 0 && (
                 <tr>
@@ -293,7 +299,7 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                       className={`border-b border-border hover:bg-muted/50 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-card" : "bg-muted/20"}`}
                       onClick={() => detailTransaksi.length > 0 && toggleCollapse(seksi.id)}
                     >
-                      <td className="px-3 py-2 text-[11px] sm:text-xs text-muted-foreground w-8">{index + 1}</td>
+                      <td className="px-3 py-2 text-[11px] sm:text-xs text-muted-foreground">{index + 1}</td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[11px] sm:text-xs font-medium truncate">{seksi.nama_seksi}</span>
@@ -303,7 +309,6 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                               : <ChevronUp className="h-3 w-3 text-muted-foreground shrink-0" />
                           )}
                         </div>
-                        {/* Progress bar under name */}
                         {!isLainnya && (
                           <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden mt-1">
                             <div
@@ -332,7 +337,7 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                         </span>
                       </td>
                       {user && (
-                        <td className="px-2 py-2 text-center w-10">
+                        <td className="px-2 py-2 text-center">
                           {!isLainnya && (
                             <span
                               role="button"
@@ -349,7 +354,6 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                       )}
                     </tr>
 
-                    {/* Inline edit row */}
                     {isEditing && (
                       <tr className="bg-muted/30">
                         <td colSpan={user ? 6 : 5} className="px-3 py-2">
@@ -393,7 +397,6 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                       </tr>
                     )}
 
-                    {/* Detail transaksi rows */}
                     {!isCollapsed && detailTransaksi.length > 0 && (
                       <tr>
                         <td colSpan={user ? 6 : 5} className="bg-muted/30 px-3 py-2">
@@ -419,23 +422,20 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
                 );
               })}
             </tbody>
+            <tfoot className="sticky bottom-0 z-10">
+              <tr className="bg-primary/5 font-semibold border-t border-border">
+                <td className="px-3 py-2 text-[11px] sm:text-xs"></td>
+                <td className="px-3 py-2 text-[11px] sm:text-xs font-semibold">Total</td>
+                <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalAnggaran)}</td>
+                <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalRealisasi)}</td>
+                <td className="px-3 py-2 text-center text-[11px] sm:text-xs">
+                  {totalAnggaran > 0 ? `${Math.round((totalRealisasi / totalAnggaran) * 100)}%` : "-"}
+                </td>
+                {user && <td className="px-2 py-2"></td>}
+              </tr>
+            </tfoot>
           </table>
         </div>
-        {/* Footer totals */}
-        <table className="w-full text-sm">
-          <tfoot>
-            <tr className="bg-primary/5 font-semibold border-t border-border">
-              <td className="px-3 py-2 text-[11px] sm:text-xs w-8"></td>
-              <td className="px-3 py-2 text-[11px] sm:text-xs font-semibold">Total</td>
-              <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalAnggaran)}</td>
-              <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalRealisasi)}</td>
-              <td className="px-3 py-2 text-center text-[11px] sm:text-xs">
-                {totalAnggaran > 0 ? `${Math.round((totalRealisasi / totalAnggaran) * 100)}%` : "-"}
-              </td>
-              {user && <td className="px-2 py-2 w-10"></td>}
-            </tr>
-          </tfoot>
-        </table>
       </div>
     </div>
   );
