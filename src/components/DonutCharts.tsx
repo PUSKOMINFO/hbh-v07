@@ -154,7 +154,7 @@ const DonutCharts = ({ transaksi, sumberDana }: DonutChartsProps) => {
               {/* Center label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-[9px] sm:text-[10px] text-muted-foreground">Saldo</span>
-                <span className="text-xs sm:text-sm font-bold">{formatShort(totalMasuk - totalKeluar)}</span>
+                <span className="text-[9px] sm:text-xs font-bold leading-tight text-center px-1">{formatRupiah(totalMasuk - totalKeluar)}</span>
               </div>
             </div>
             <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-3">
