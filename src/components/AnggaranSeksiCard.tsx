@@ -236,7 +236,7 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
 
       {/* Data Table */}
       <div className="overflow-x-auto">
-        <div className="max-h-[55vh] overflow-y-auto">
+        <div>
           <table className="w-full text-sm table-fixed">
             <colgroup>
               <col className="w-[36px]" />
