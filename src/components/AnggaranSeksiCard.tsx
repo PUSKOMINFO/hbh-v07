@@ -440,6 +440,5 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
     </div>
   );
 };
-};
 
 export default AnggaranSeksiCard;
