@@ -153,8 +153,8 @@ const DonutCharts = ({ transaksi, sumberDana }: DonutChartsProps) => {
               </ResponsiveContainer>
               {/* Center label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground">Saldo</span>
-                <span className="text-[9px] sm:text-xs font-bold leading-tight text-center px-1">{formatRupiah(totalMasuk - totalKeluar)}</span>
+                <span className="text-[9px] sm:text-[10px] text-muted-foreground">Total</span>
+                <span className="text-[9px] sm:text-xs font-bold leading-tight text-center px-1">{formatShort(totalMasuk + totalKeluar)}</span>
               </div>
             </div>
             <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-3">
@@ -174,6 +174,21 @@ const DonutCharts = ({ transaksi, sumberDana }: DonutChartsProps) => {
                 <div className="min-w-0">
                   <p className="text-[10px] sm:text-xs text-muted-foreground">Dana Keluar</p>
                   <p className="text-xs sm:text-sm font-bold text-[hsl(0,72%,50%)] truncate">{formatRupiah(totalKeluar)}</p>
+                </div>
+              </div>
+              {/* Saldo */}
+              <div className="border-t border-border pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">Saldo</span>
+                  <span className={`text-xs sm:text-sm font-bold ${
+                    totalMasuk - totalKeluar > 0
+                      ? "text-[hsl(210,75%,55%)]"
+                      : totalMasuk - totalKeluar < 0
+                        ? "text-[hsl(0,72%,50%)]"
+                        : "text-muted-foreground"
+                  }`}>
+                    {formatRupiah(totalMasuk - totalKeluar)}
+                  </span>
                 </div>
               </div>
             </div>
