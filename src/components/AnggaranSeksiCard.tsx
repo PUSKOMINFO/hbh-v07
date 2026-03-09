@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, ClipboardList, Search, Filter, X, FileText, Pen
 import { useState } from "react";
 import { printSeksiPdf } from "@/lib/exportUtils";
 import { toast } from "sonner";
+import { EXCLUDED_SUMBER } from "@/lib/constants";
 
 interface AnggaranSeksiCardProps {
   transaksi: TransaksiRow[];
@@ -59,7 +60,7 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
 
   const totalAnggaran = anggaranSeksi.reduce((s, a) => s + a.anggaran, 0);
   const totalDanaMasuk = transaksi
-    .filter((t) => t.jenis === "masuk")
+    .filter((t) => t.jenis === "masuk" && t.kategori !== EXCLUDED_SUMBER)
     .reduce((s, t) => s + t.nominal, 0);
   const totalRealisasi = transaksi
     .filter((t) => t.jenis === "keluar")
