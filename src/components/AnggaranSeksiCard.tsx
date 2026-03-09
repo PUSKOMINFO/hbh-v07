@@ -165,6 +165,8 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-muted-foreground">
           <span>Total Kebutuhan Anggaran: <strong className="text-foreground">{formatRupiah(totalAnggaran)}</strong></span>
           <span className="hidden sm:inline">·</span>
+          <span>Dana Masuk: <strong className="text-[hsl(152,60%,40%)]">{formatRupiah(totalDanaMasuk)}</strong></span>
+          <span className="hidden sm:inline">·</span>
           <span>Realisasi Serapan: <strong className="text-foreground">{formatRupiah(totalRealisasi)}</strong></span>
         </div>
 
