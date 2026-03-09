@@ -4,13 +4,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, DatabaseBackup, Download, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, Download, FileText, ChevronDown } from "lucide-react";
 import { exportSumberDanaXlsx, printSumberDanaPdf } from "@/lib/exportUtils";
 import SumberDanaForm from "./SumberDanaForm";
 
 interface SumberDanaTableProps {
   data: SumberDana[];
 }
+
+const PAGE_SIZE = 15;
 
 const formatRupiah = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
@@ -22,6 +24,7 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -39,6 +42,8 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
   }, [data, search, sortDir]);
 
   const totalNominal = filtered.reduce((s, d) => s + d.nominal, 0);
+  const visibleData = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("sumber_dana").delete().eq("id", id);
@@ -118,10 +123,10 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
             </tr>
           </thead>
         </table>
-        <div className="max-h-[45vh] overflow-y-auto">
+        <div>
           <table className="w-full text-sm">
             <tbody>
-              {filtered.map((d, i) => (
+              {visibleData.map((d, i) => (
                 <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                   <td className="py-2.5 px-3 text-muted-foreground w-10">{i + 1}</td>
                   <td className="py-2.5 px-3 font-medium text-foreground">{d.namaCabang}</td>
@@ -149,6 +154,17 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
               ))}
             </tbody>
           </table>
+          {hasMore && (
+            <div className="flex justify-center py-2 border-b border-border">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors px-3 py-1.5 rounded-md hover:bg-primary/5"
+              >
+                <ChevronDown className="h-3.5 w-3.5" />
+                Tampilkan lagi ({filtered.length - visibleCount} sisa)
+              </button>
+            </div>
+          )}
         </div>
         <table className="w-full text-sm">
           <tfoot>
