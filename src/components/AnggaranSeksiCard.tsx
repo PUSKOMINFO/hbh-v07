@@ -233,165 +233,212 @@ const AnggaranSeksiCard = ({ transaksi }: AnggaranSeksiCardProps) => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-px bg-border">
-        {filteredSeksi.length === 0 && (
-          <div className="col-span-full bg-card p-6 flex flex-col items-center justify-center gap-1 text-center">
-            <Search className="h-5 w-5 text-muted-foreground/50" />
-            <p className="text-xs text-muted-foreground">Tidak ada seksi yang sesuai filter</p>
-            <button onClick={clearFilters} className="text-[11px] text-primary hover:underline font-medium mt-1">
-              Reset Filter
-            </button>
-          </div>
-        )}
-        {filteredSeksi.map((seksi) => {
-          const realisasi = realisasiMap[seksi.nama_seksi] || 0;
-          const isLainnya = seksi.nama_seksi === "Lainnya" && seksi.anggaran === 0;
-          const persen = seksi.anggaran > 0 ? Math.round((realisasi / seksi.anggaran) * 100) : (realisasi > 0 ? 100 : 0);
-          const isOver = !isLainnya && realisasi > seksi.anggaran;
-          const isCollapsed = collapsedIds.has(seksi.id);
-          const isEditing = editingId === seksi.id;
-
-          const detailTransaksi = transaksi.filter(
-            (t) => t.jenis === "keluar" && t.kategori === seksi.nama_seksi
-          );
-
-          return (
-            <div key={seksi.id} className="bg-card flex flex-col">
-              <button
-                onClick={() => toggleCollapse(seksi.id)}
-                className="w-full flex flex-col gap-1.5 p-3 hover:bg-muted/50 transition-colors text-left"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <p className="text-xs font-medium truncate">{seksi.nama_seksi}</p>
-                  <div className="flex items-center gap-1">
-                    {user && !isLainnya && (
-                      <span
-                        role="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartEdit(seksi);
-                        }}
-                        className="inline-flex items-center justify-center h-5 w-5 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </span>
-                    )}
-                    {detailTransaksi.length > 0 && (
-                      isCollapsed
-                        ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        : <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    )}
-                  </div>
-                </div>
-
-                {isLainnya ? (
-                  <div className="flex flex-col text-[10px] text-muted-foreground leading-tight">
-                    <span>Total: <strong className="text-foreground">{formatRupiah(realisasi)}</strong></span>
-                    <span className="text-muted-foreground/60 italic">Tanpa batas anggaran</span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="w-full flex items-center gap-1.5">
-                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            isOver
-                              ? "bg-destructive"
-                              : persen >= 75
-                              ? "bg-[hsl(38,92%,50%)]"
-                              : "bg-primary"
-                          }`}
-                          style={{ width: `${Math.min(persen, 100)}%` }}
-                        />
-                      </div>
-                      <span className={`text-[10px] font-semibold whitespace-nowrap ${isOver ? "text-destructive" : "text-muted-foreground"}`}>
-                        {persen}%
-                      </span>
+      {/* Data Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 z-10">
+            <tr className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
+              <th className="text-left px-3 py-2 font-medium">No</th>
+              <th className="text-left px-3 py-2 font-medium">Nama Seksi</th>
+              <th className="text-right px-3 py-2 font-medium">Anggaran</th>
+              <th className="text-right px-3 py-2 font-medium">Realisasi</th>
+              <th className="text-center px-3 py-2 font-medium">%</th>
+              {user && <th className="text-center px-3 py-2 font-medium w-10"></th>}
+            </tr>
+          </thead>
+        </table>
+        <div className="max-h-[50vh] overflow-y-auto">
+          <table className="w-full text-sm">
+            <tbody>
+              {filteredSeksi.length === 0 && (
+                <tr>
+                  <td colSpan={user ? 6 : 5} className="text-center py-6">
+                    <div className="flex flex-col items-center gap-1">
+                      <Search className="h-5 w-5 text-muted-foreground/50" />
+                      <p className="text-xs text-muted-foreground">Tidak ada seksi yang sesuai filter</p>
+                      <button onClick={clearFilters} className="text-[11px] text-primary hover:underline font-medium mt-1">
+                        Reset Filter
+                      </button>
                     </div>
-                    <div className="flex flex-col text-[10px] text-muted-foreground leading-tight">
-                      <span>{formatRupiah(realisasi)}</span>
-                      <span className="text-muted-foreground/60">/ {formatRupiah(seksi.anggaran)}</span>
-                      {isOver && (
-                        <span className="text-destructive font-semibold">
-                          +{formatRupiah(realisasi - seksi.anggaran)}
+                  </td>
+                </tr>
+              )}
+              {filteredSeksi.map((seksi, index) => {
+                const realisasi = realisasiMap[seksi.nama_seksi] || 0;
+                const isLainnya = seksi.nama_seksi === "Lainnya" && seksi.anggaran === 0;
+                const persen = seksi.anggaran > 0 ? Math.round((realisasi / seksi.anggaran) * 100) : (realisasi > 0 ? 100 : 0);
+                const isOver = !isLainnya && realisasi > seksi.anggaran;
+                const isCollapsed = collapsedIds.has(seksi.id);
+                const isEditing = editingId === seksi.id;
+                const detailTransaksi = transaksi.filter(
+                  (t) => t.jenis === "keluar" && t.kategori === seksi.nama_seksi
+                );
+
+                const statusColor = isOver
+                  ? "text-destructive"
+                  : persen >= 75
+                  ? "text-[hsl(38,92%,50%)]"
+                  : "text-primary";
+
+                const barColor = isOver
+                  ? "bg-destructive"
+                  : persen >= 75
+                  ? "bg-[hsl(38,92%,50%)]"
+                  : "bg-primary";
+
+                return (
+                  <React.Fragment key={seksi.id}>
+                    <tr
+                      className={`border-b border-border hover:bg-muted/50 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-card" : "bg-muted/20"}`}
+                      onClick={() => detailTransaksi.length > 0 && toggleCollapse(seksi.id)}
+                    >
+                      <td className="px-3 py-2 text-[11px] sm:text-xs text-muted-foreground w-8">{index + 1}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] sm:text-xs font-medium truncate">{seksi.nama_seksi}</span>
+                          {detailTransaksi.length > 0 && (
+                            isCollapsed
+                              ? <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
+                              : <ChevronUp className="h-3 w-3 text-muted-foreground shrink-0" />
+                          )}
+                        </div>
+                        {/* Progress bar under name */}
+                        {!isLainnya && (
+                          <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden mt-1">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                              style={{ width: `${Math.min(persen, 100)}%` }}
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <span className="text-[11px] sm:text-xs text-muted-foreground">
+                          {isLainnya ? "-" : formatRupiah(seksi.anggaran)}
                         </span>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <span className="text-[11px] sm:text-xs font-medium">{formatRupiah(realisasi)}</span>
+                        {isOver && (
+                          <div className="text-[9px] text-destructive font-semibold">
+                            +{formatRupiah(realisasi - seksi.anggaran)}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <span className={`text-[11px] sm:text-xs font-semibold ${statusColor}`}>
+                          {isLainnya ? "-" : `${persen}%`}
+                        </span>
+                      </td>
+                      {user && (
+                        <td className="px-2 py-2 text-center w-10">
+                          {!isLainnya && (
+                            <span
+                              role="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEdit(seksi);
+                              }}
+                              className="inline-flex items-center justify-center h-6 w-6 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </span>
+                          )}
+                        </td>
                       )}
-                    </div>
-                  </>
-                )}
-              </button>
+                    </tr>
 
-              {/* Inline edit anggaran */}
-              {isEditing && (
-                <div className="border-t border-border bg-muted/30 px-3 py-2" onClick={(e) => e.stopPropagation()}>
-                  <label className="text-[10px] text-muted-foreground font-medium mb-1 block">Edit Anggaran</label>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value.replace(/[^0-9]/g, ""))}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit(seksi.id);
-                        if (e.key === "Escape") setEditingId(null);
-                      }}
-                      autoFocus
-                      className="flex-1 h-7 px-2 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Nominal anggaran"
-                    />
-                    <button
-                      onClick={() => handleSaveEdit(seksi.id)}
-                      disabled={updateAnggaran.isPending}
-                      className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-border text-muted-foreground hover:bg-muted transition-colors"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  {editValue && (
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {formatRupiah(Number(editValue) || 0)}
-                    </p>
-                  )}
-                </div>
-              )}
+                    {/* Inline edit row */}
+                    {isEditing && (
+                      <tr className="bg-muted/30">
+                        <td colSpan={user ? 6 : 5} className="px-3 py-2">
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <label className="text-[10px] text-muted-foreground font-medium mb-1 block">Edit Anggaran</label>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value.replace(/[^0-9]/g, ""))}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleSaveEdit(seksi.id);
+                                  if (e.key === "Escape") setEditingId(null);
+                                }}
+                                autoFocus
+                                className="flex-1 h-7 px-2 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                                placeholder="Nominal anggaran"
+                              />
+                              <button
+                                onClick={() => handleSaveEdit(seksi.id)}
+                                disabled={updateAnggaran.isPending}
+                                className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setEditingId(null)}
+                                className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-border text-muted-foreground hover:bg-muted transition-colors"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            {editValue && (
+                              <p className="text-[10px] text-muted-foreground mt-1">
+                                {formatRupiah(Number(editValue) || 0)}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
 
-              {/* Detail items */}
-              {!isCollapsed && detailTransaksi.length > 0 && (
-                <div className="bg-muted/30 border-t border-border px-3 py-2 space-y-1.5 flex-1">
-                  {detailTransaksi.map((t) => (
-                    <div key={t.id} className="text-[10px]">
-                      <div className="flex items-start justify-between gap-1">
-                        <span className="text-foreground leading-tight">{t.keterangan}</span>
-                        <span className="text-destructive font-medium whitespace-nowrap">
-                          -{formatRupiah(t.nominal)}
-                        </span>
-                      </div>
-                      <span className="text-muted-foreground">
-                        {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Empty state */}
-              {detailTransaksi.length === 0 && !isEditing && (
-                <div className="bg-muted/20 border-t border-border px-3 py-2 flex-1 flex items-center justify-center">
-                  <span className="text-[10px] text-muted-foreground/50 italic">Belum ada transaksi</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+                    {/* Detail transaksi rows */}
+                    {!isCollapsed && detailTransaksi.length > 0 && (
+                      <tr>
+                        <td colSpan={user ? 6 : 5} className="bg-muted/30 px-3 py-2">
+                          <div className="space-y-1.5">
+                            {detailTransaksi.map((t) => (
+                              <div key={t.id} className="flex items-start justify-between gap-2 text-[10px]">
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-foreground leading-tight">{t.keterangan}</span>
+                                  <span className="text-muted-foreground ml-1.5">
+                                    {new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                                  </span>
+                                </div>
+                                <span className="text-destructive font-medium whitespace-nowrap">
+                                  -{formatRupiah(t.nominal)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {/* Footer totals */}
+        <table className="w-full text-sm">
+          <tfoot>
+            <tr className="bg-primary/5 font-semibold border-t border-border">
+              <td className="px-3 py-2 text-[11px] sm:text-xs w-8"></td>
+              <td className="px-3 py-2 text-[11px] sm:text-xs font-semibold">Total</td>
+              <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalAnggaran)}</td>
+              <td className="px-3 py-2 text-right text-[11px] sm:text-xs">{formatRupiah(totalRealisasi)}</td>
+              <td className="px-3 py-2 text-center text-[11px] sm:text-xs">
+                {totalAnggaran > 0 ? `${Math.round((totalRealisasi / totalAnggaran) * 100)}%` : "-"}
+              </td>
+              {user && <td className="px-2 py-2 w-10"></td>}
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   );
+};
 };
 
 export default AnggaranSeksiCard;
