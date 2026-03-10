@@ -61,54 +61,125 @@ const SumberDanaTable = ({ data }: SumberDanaTableProps) => {
     setFormOpen(true);
   };
 
-    return (
-      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-semibold">Sumber Dana Donasi</h2>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
-            </div>
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {user && (
-                    <>
-                      <button onClick={() => exportSumberDanaXlsx(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
-                        <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Excel</span>
-                      </button>
-                      <button onClick={() => printSumberDanaPdf(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-red-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
-                        <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">PDF</span>
-                      </button>
-                    </>
-                  )}
-                  {user && (
-                    <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
-                      <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
-                    </button>
-                )}
-              </div>
+  return (
+    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+      <div className="p-3 sm:p-4 border-b border-border space-y-2.5 sm:space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-base font-semibold">Sumber Dana Donasi</h2>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Kontribusi per sumber donasi</p>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Cari sumber donasi..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {user && (
+              <>
+                <button onClick={() => exportSumberDanaXlsx(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                  <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Excel</span>
+                </button>
+                <button onClick={() => printSumberDanaPdf(filtered)} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-red-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                  <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">PDF</span>
+                </button>
+              </>
+            )}
+            {user && (
+              <button onClick={() => { setEditItem(null); setFormOpen(true); }} className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-primary text-primary-foreground rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:opacity-90 transition-opacity">
+                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Tambah
+              </button>
+            )}
           </div>
         </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Cari sumber donasi..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+        </div>
+      </div>
 
       {/* Inline Form */}
       <SumberDanaForm isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} editData={editItem} />
 
-      <div className="overflow-x-auto">
+      {/* Mobile Card Layout */}
+      <div className="sm:hidden">
+        {/* Sort control */}
+        <div className="flex items-center justify-between px-3 py-2 bg-primary text-primary-foreground">
+          <span className="text-[11px] font-medium">{filtered.length} sumber donasi</span>
+          <button
+            onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
+            className="inline-flex items-center gap-1 text-[11px] font-medium hover:opacity-80 transition-opacity"
+          >
+            Nominal
+            {sortDir === null && <ArrowUpDown className="h-3 w-3 opacity-60" />}
+            {sortDir === "asc" && <ArrowUp className="h-3 w-3" />}
+            {sortDir === "desc" && <ArrowDown className="h-3 w-3" />}
+          </button>
+        </div>
+
+        <div className="divide-y divide-border">
+          {visibleData.map((d, i) => (
+            <div key={d.id} className="px-3 py-2.5 active:bg-muted/50 transition-colors">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="text-[10px] text-muted-foreground w-4 shrink-0 text-center">{i + 1}</span>
+                  <span className="text-xs font-medium truncate">{d.namaCabang}</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-xs font-semibold text-foreground">{formatRupiah(d.nominal)}</span>
+                  {user && (
+                    <div className="flex items-center gap-0.5 ml-1">
+                      {deleteId === d.id ? (
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleDelete(d.id)} className="px-2 py-1 text-[10px] rounded bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Hapus</button>
+                          <button onClick={() => setDeleteId(null)} className="px-2 py-1 text-[10px] rounded border border-border hover:bg-muted transition-colors">Batal</button>
+                        </div>
+                      ) : (
+                        <>
+                          <button onClick={() => openEdit(d)} className="p-1.5 hover:bg-primary/10 rounded-md transition-colors" title="Edit">
+                            <Pencil className="h-3 w-3 text-primary" />
+                          </button>
+                          <button onClick={() => setDeleteId(d.id)} className="p-1.5 hover:bg-destructive/10 rounded-md transition-colors" title="Hapus">
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {hasMore && (
+          <div className="flex justify-center py-2.5 border-t border-border">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors px-3 py-1.5 rounded-md hover:bg-primary/5"
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+              Tampilkan lagi ({filtered.length - visibleCount} sisa)
+            </button>
+          </div>
+        )}
+
+        {/* Mobile footer total */}
+        <div className="px-3 py-2.5 bg-primary/5 border-t border-border flex items-center justify-between">
+          <span className="text-xs font-semibold">Total</span>
+          <span className="text-xs font-semibold">{formatRupiah(totalNominal)}</span>
+        </div>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="bg-primary text-primary-foreground">
               <th className="py-2.5 px-3 text-left font-medium w-10">No</th>
               <th className="py-2.5 px-3 text-left font-medium">Sumber Donasi</th>
-                <th className="py-2.5 px-3 text-right font-medium">
+              <th className="py-2.5 px-3 text-right font-medium">
                 <button
                   onClick={() => setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null)}
                   className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
